@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/features/auth/presentation/widgets/login_form.dart';
 
 class LoginPage extends StatelessWidget {
@@ -14,19 +15,19 @@ class LoginPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset('assets/images/logo.png', height: 100, width: 100),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Text(
                 'Velmar Ads',
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Text(
                 'Optimiza tu impacto publicitario',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               const LoginForm(),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               RichText(
                 text: TextSpan(
                   text: '¿No tienes una cuenta? ',
@@ -37,7 +38,7 @@ class LoginPage extends StatelessWidget {
                       style: TextStyle(color: Theme.of(context).primaryColor),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          Navigator.pushNamed(context, '/register');
+                          context.go('/register');
                         },
                     ),
                   ],
@@ -50,3 +51,4 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+
