@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:velmar_ads/features/auth/presentation/bloc/auth_bloc.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -14,7 +18,7 @@ class _SignUpFormState extends State<SignUpForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -104,7 +108,9 @@ class _SignUpFormState extends State<SignUpForm> {
                 if (value == null || value.isEmpty) {
                   return 'Por favor ingresa tu correo';
                 }
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                if (!RegExp(
+                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                ).hasMatch(value)) {
                   return 'Por favor ingresa un correo válido';
                 }
                 return null;
@@ -154,7 +160,9 @@ class _SignUpFormState extends State<SignUpForm> {
                 prefixIcon: const Icon(Icons.lock_outlined),
                 suffixIcon: IconButton(
                   icon: Icon(
-                    _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                    _obscureConfirmPassword
+                        ? Icons.visibility_off
+                        : Icons.visibility,
                   ),
                   onPressed: () {
                     setState(() {
@@ -185,7 +193,29 @@ class _SignUpFormState extends State<SignUpForm> {
               child: ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // Acción de registro
+                    final authBloc = context.read<AuthBloc>();
+                    // 1. Nos suscribimos al flujo de estados del Bloc temporalmente
+                    late final StreamSubscription subscription;
+                    subscription = authBloc.stream.listen((state) {
+                      if (state is AuthSuccess) {
+                        print("✅ Éxito desde onPressed: ${state.uid}");
+                        subscription
+                            .cancel(); // Cancelamos para evitar memory leaks
+                      } else if (state is AuthFailure) {
+                        print("❌ Error desde onPressed: ${state.message}");
+                        subscription
+                            .cancel(); // Cancelamos para evitar memory leaks
+                      }
+                    });
+
+                    context.read<AuthBloc>().add(
+                      AuthSignUp(
+                        name: _nameController.text,
+                        phone: _phoneController.text,
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                      ),
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
