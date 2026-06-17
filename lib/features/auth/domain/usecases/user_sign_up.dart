@@ -7,7 +7,7 @@ import 'package:velmar_ads/features/auth/domain/repository/auth_repository.dart'
 class UserSignUp implements UseCase<User, UserSignUpParams> {
   final AuthRepository authRepository;
 
-  UserSignUp({required this.authRepository});
+  const UserSignUp({required this.authRepository});
 
   @override
   Future<Either<Failure, User>> call(UserSignUpParams params) async {

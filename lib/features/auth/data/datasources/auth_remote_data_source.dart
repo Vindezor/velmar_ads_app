@@ -3,6 +3,8 @@ import 'package:velmar_ads/core/error/exceptions.dart';
 import 'package:velmar_ads/features/auth/data/models/user_model.dart';
 
 abstract interface class AuthRemoteDataSource {
+  Session? get currentUserSession;
+
   Future<UserModel> signUpWithEmailPassword({
     required String name,
     required String phone,
@@ -14,12 +16,17 @@ abstract interface class AuthRemoteDataSource {
     required String email,
     required String password,
   });
+
+  Future<UserModel?> getCurrentUserData();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final SupabaseClient supabaseClient;
 
-  AuthRemoteDataSourceImpl({required this.supabaseClient});
+  const AuthRemoteDataSourceImpl({required this.supabaseClient});
+
+  @override
+  Session? get currentUserSession => supabaseClient.auth.currentSession;
 
   @override
   Future<UserModel> loginWithEmailPassword({
@@ -61,6 +68,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       return UserModel.fromJson(response.user!.toJson());
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<UserModel?> getCurrentUserData() async {
+    try {
+      if (currentUserSession != null) {
+        final userData = await supabaseClient
+            .from('profiles')
+            .select()
+            .eq('id', currentUserSession!.user.id);
+      }
+      return null;
     } catch (e) {
       throw ServerException(e.toString());
     }
