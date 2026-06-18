@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/failures.dart';
-import 'package:velmar_ads/features/auth/domain/entities/user.dart';
+import 'package:velmar_ads/core/common/user.dart';
 
 abstract interface class AuthRepository {
   Future<Either<Failure, User>> signUpWithEmailPassword({
@@ -14,4 +14,6 @@ abstract interface class AuthRepository {
     required String email,
     required String password,
   });
+
+  Future<Either<Failure, User>> currentUser();
 }

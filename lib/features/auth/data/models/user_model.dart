@@ -1,4 +1,4 @@
-import 'package:velmar_ads/features/auth/domain/entities/user.dart';
+import 'package:velmar_ads/core/common/user.dart';
 
 class UserModel extends User {
   UserModel({

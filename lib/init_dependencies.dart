@@ -1,9 +1,11 @@
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:velmar_ads/core/secrets/app_secrets.dart';
 import 'package:velmar_ads/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:velmar_ads/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:velmar_ads/features/auth/domain/repository/auth_repository.dart';
+import 'package:velmar_ads/features/auth/domain/usecases/current_user.dart';
 import 'package:velmar_ads/features/auth/domain/usecases/user_login.dart';
 import 'package:velmar_ads/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:velmar_ads/features/auth/presentation/bloc/auth_bloc.dart';
@@ -17,6 +19,9 @@ Future<void> initDependencies() async {
     publishableKey: AppSecrets.supabasePublishableKey,
   );
   serviceLocator.registerLazySingleton(() => supabase.client);
+
+  //core
+  serviceLocator.registerLazySingleton(() => AppUserCubit());
 }
 
 void _initAuth() {
@@ -29,7 +34,13 @@ void _initAuth() {
     )
     ..registerFactory(() => UserSignUp(authRepository: serviceLocator()))
     ..registerFactory(() => UserLogin(authRepository: serviceLocator()))
+    ..registerFactory(() => CurrentUser(authRepository: serviceLocator()))
     ..registerLazySingleton(
-      () => AuthBloc(userSignUp: serviceLocator(), userLogin: serviceLocator()),
+      () => AuthBloc(
+        userSignUp: serviceLocator(),
+        userLogin: serviceLocator(),
+        currentUser: serviceLocator(),
+        appUserCubit: serviceLocator(),
+      ),
     );
 }

@@ -3,13 +3,39 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 import 'package:velmar_ads/core/error/exceptions.dart';
 import 'package:velmar_ads/core/error/failures.dart';
 import 'package:velmar_ads/features/auth/data/datasources/auth_remote_data_source.dart';
-import 'package:velmar_ads/features/auth/domain/entities/user.dart';
+import 'package:velmar_ads/core/common/user.dart';
 import 'package:velmar_ads/features/auth/domain/repository/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource authRemoteDataSource;
 
   const AuthRepositoryImpl({required this.authRemoteDataSource});
+
+  @override
+  Future<Either<Failure, User>> currentUser() async {
+    try {
+      final user = await authRemoteDataSource.getCurrentUserData();
+      if (user == null) {
+        return left(Failure('Usuario no autenticado'));
+      }
+      return right(user);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> loginWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {
+    return _getUser(
+      () async => await authRemoteDataSource.loginWithEmailPassword(
+        email: email,
+        password: password,
+      ),
+    );
+  }
 
   @override
   Future<Either<Failure, User>> signUpWithEmailPassword({
@@ -22,19 +48,6 @@ class AuthRepositoryImpl implements AuthRepository {
       () async => await authRemoteDataSource.signUpWithEmailPassword(
         name: name,
         phone: phone,
-        email: email,
-        password: password,
-      ),
-    );
-  }
-
-  @override
-  Future<Either<Failure, User>> loginWithEmailPassword({
-    required String email,
-    required String password,
-  }) async {
-    return _getUser(
-      () async => await authRemoteDataSource.loginWithEmailPassword(
         email: email,
         password: password,
       ),

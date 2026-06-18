@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/failures.dart';
 import 'package:velmar_ads/core/usecase/usecase.dart';
-import 'package:velmar_ads/features/auth/domain/entities/user.dart';
+import 'package:velmar_ads/core/common/user.dart';
 import 'package:velmar_ads/features/auth/domain/repository/auth_repository.dart';
 
 class UserSignUp implements UseCase<User, UserSignUpParams> {
