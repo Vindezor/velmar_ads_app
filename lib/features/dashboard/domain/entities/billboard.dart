@@ -9,6 +9,11 @@ class Billboard {
   final String screenClassLabel;
   final double pricePerHour;
   final String imageUrl;
+  final double? widthM;
+  final double? heightM;
+  final int? resolutionW;
+  final int? resolutionH;
+  final List<String> acceptedFormats;
 
   Billboard({
     required this.id,
@@ -21,5 +26,10 @@ class Billboard {
     required this.screenClassLabel,
     required this.pricePerHour,
     required this.imageUrl,
+    this.widthM,
+    this.heightM,
+    this.resolutionW,
+    this.resolutionH,
+    required this.acceptedFormats,
   });
 }

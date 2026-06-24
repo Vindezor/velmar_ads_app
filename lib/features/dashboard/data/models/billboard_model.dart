@@ -12,6 +12,11 @@ class BillboardModel extends Billboard {
     required super.screenClassLabel,
     required super.pricePerHour,
     required super.imageUrl,
+    super.widthM,
+    super.heightM,
+    super.resolutionW,
+    super.resolutionH,
+    required super.acceptedFormats,
   });
 
   factory BillboardModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +45,14 @@ class BillboardModel extends Billboard {
       screenClassLabel: screenClassLabel,
       pricePerHour: pricePerHour,
       imageUrl: imageUrl,
+      widthM: (json['width_m'] as num?)?.toDouble(),
+      heightM: (json['height_m'] as num?)?.toDouble(),
+      resolutionW: json['resolution_w'] as int?,
+      resolutionH: json['resolution_h'] as int?,
+      acceptedFormats: (json['accepted_formats'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const ['image/jpeg', 'image/png', 'video/mp4'],
     );
   }
 

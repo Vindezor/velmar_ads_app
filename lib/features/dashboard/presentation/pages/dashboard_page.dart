@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/common/widgets/loader.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
-import 'package:velmar_ads/core/utils/show_snackbar.dart';
 import 'package:velmar_ads/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:velmar_ads/features/dashboard/presentation/widgets/dashboard_app_bar.dart';
 import 'package:velmar_ads/features/dashboard/presentation/widgets/dashboard_error_view.dart';
@@ -48,9 +48,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 data: data,
                 onRefresh: () async => _loadData(),
                 onBillboardTap: (billboard) {
-                  showSnackBar(
-                    context: context,
-                    message: 'Reservar ${billboard.name}',
+                  context.pushNamed(
+                    'billboard-detail',
+                    pathParameters: {'id': billboard.id},
+                    extra: billboard,
                   );
                 },
               ),

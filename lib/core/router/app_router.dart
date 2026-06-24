@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:velmar_ads/core/common/widgets/navigation_shell.dart';
+import 'package:velmar_ads/core/router/app_routes.dart';
 import 'package:velmar_ads/features/auth/presentation/pages/login_page.dart';
 import 'package:velmar_ads/features/auth/presentation/pages/signup_page.dart';
 import 'package:velmar_ads/features/bookings/presentation/pages/bookings_page.dart';
+import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
+import 'package:velmar_ads/features/dashboard/presentation/pages/billboard_detail_page.dart';
 import 'package:velmar_ads/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:velmar_ads/features/library/presentation/pages/library_page.dart';
 import 'package:velmar_ads/features/profile/presentation/pages/profile_page.dart';
@@ -27,7 +30,7 @@ class GoRouterRefreshStream extends ChangeNotifier {
 }
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/login',
+  initialLocation: AppRoutes.login,
 
   // 1. Escucha en tiempo real los cambios del AppUserCubit
   refreshListenable: GoRouterRefreshStream(
@@ -41,17 +44,17 @@ final GoRouter appRouter = GoRouter(
 
     // Verificamos si el usuario intenta ir a Login o Registro
     final isGoingToAuth =
-        state.matchedLocation == '/login' ||
-        state.matchedLocation == '/register';
+        state.matchedLocation == AppRoutes.login ||
+        state.matchedLocation == AppRoutes.register;
 
     // Caso A: El usuario NO está logueado y quiere entrar al Dashboard (u otra pantalla privada)
     if (!isLoggedIn && !isGoingToAuth) {
-      return '/login';
+      return AppRoutes.login;
     }
 
     // Caso B: El usuario YA está logueado pero intenta volver a las pantallas de Auth
     if (isLoggedIn && isGoingToAuth) {
-      return '/dashboard';
+      return AppRoutes.dashboard;
     }
 
     // En cualquier otro caso, lo dejamos continuar normalmente
@@ -60,12 +63,12 @@ final GoRouter appRouter = GoRouter(
 
   routes: [
     GoRoute(
-      path: '/login',
+      path: AppRoutes.login,
       name: 'login',
       builder: (context, state) => const LoginPage(),
     ),
     GoRoute(
-      path: '/register',
+      path: AppRoutes.register,
       name: 'register',
       builder: (context, state) => const SignUpPage(),
     ),
@@ -79,16 +82,26 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/dashboard',
+              path: AppRoutes.dashboard,
               name: 'dashboard',
               builder: (context, state) => const DashboardPage(),
+              routes: [
+                GoRoute(
+                  path: 'billboard/:id',
+                  name: 'billboard-detail',
+                  builder: (context, state) {
+                    final billboard = state.extra as Billboard?;
+                    return BillboardDetailPage(billboard: billboard);
+                  },
+                ),
+              ],
             ),
           ],
         ),
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/bookings',
+              path: AppRoutes.bookings,
               name: 'bookings',
               builder: (context, state) => const BookingsPage(),
             ),
@@ -97,7 +110,7 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/library',
+              path: AppRoutes.library,
               name: 'library',
               builder: (context, state) => const LibraryPage(),
             ),
@@ -106,7 +119,7 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/profile',
+              path: AppRoutes.profile,
               name: 'profile',
               builder: (context, state) => const ProfilePage(),
             ),
