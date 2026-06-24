@@ -19,6 +19,8 @@ Este proyecto utiliza **Clean Architecture** (Arquitectura Limpia) con **Flutter
     *   Al crear una nueva característica, siempre divídela en `domain`, `data` y `presentation` con sus respectivas subcarpetas.
     *   No mezcles lógica de datos (ej. cliente de Supabase, serialización JSON) en la capa de UI o dominio.
     *   **Prohibición de Importaciones Cruzadas en Capa de Datos**: Queda estrictamente prohibido que una característica importación directa de componentes de la capa de datos (`Models`, `DataSources`, `RepositoriesImpl`) de otra característica. Para compartir información de usuario, usa las entidades y cubits globales provistos en `core` (ej: `User` y `AppUserCubit` en `lib/core/common/`).
+    *   **No Modificar Características Existentes por Requerimientos de Nuevas Características**: Queda terminantemente prohibido modificar modelos, data sources, entidades o repositorios de una característica ya implementada (como `auth`) solo para satisfacer las necesidades de datos de una característica nueva (como `dashboard`). Cada característica debe ser completamente autónoma y resolver sus consultas en su propio DataSource utilizando los identificadores compartidos de `core` (como el ID del usuario provisto por la sesión). No se debe acoplar o contaminar la lógica de otras características.
+
 
 
 2.  **Manejo de Errores y Tipos Retornados**:

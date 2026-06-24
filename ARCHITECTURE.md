@@ -97,7 +97,9 @@ El desarrollo visual de las interfaces en **Velmar Ads** sigue un flujo estructu
 ## 💡 Reglas para Crear Nuevos Módulos o Características
 
 > [!WARNING]
-> **Prohibición de Importaciones Cruzadas (Acoplamiento de Features)**: Queda estrictamente prohibido importar clases de la capa de datos (`Models`, `DataSources`, `RepositoriesImpl`) de una característica en otra. El acoplamiento entre características debe ocurrir únicamente a través de la capa `core/common/` mediante entidades y cubits globales compartidos (por ejemplo, utilizando `User` y `AppUserCubit` para consultar créditos o sesión del usuario).
+> * **Prohibición de Importaciones Cruzadas (Acoplamiento de Features)**: Queda estrictamente prohibido importar clases de la capa de datos (`Models`, `DataSources`, `RepositoriesImpl`) de una característica en otra. El acoplamiento entre características debe ocurrir únicamente a través de la capa `core/common/` mediante entidades y cubits globales compartidos (por ejemplo, utilizando `User` y `AppUserCubit` para consultar la sesión del usuario).
+> * **Autonomía de Características Existentes**: Queda estrictamente prohibido modificar modelos, data sources, entidades o repositorios de características ya establecidas (como `auth`) con el único fin de alimentar o satisfacer los requerimientos de datos de una nueva característica (como `dashboard`). Cada característica debe resolver sus consultas y persistencia de forma independiente mediante su propio `DataSource`, consumiendo de `core` únicamente identificadores compartidos de sesión (como el ID del usuario).
+
 
 Cuando se te solicite agregar una nueva funcionalidad (ej. `campaigns`, `analytics`), debes seguir este orden y estructura:
 
