@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
+import 'package:velmar_ads/core/utils/currency_formatter.dart';
 import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
 
 class BillboardCard extends StatelessWidget {
@@ -185,7 +186,7 @@ class BillboardCard extends StatelessWidget {
                             children: billboard.isActive
                                 ? [
                                     Text(
-                                      '\$${billboard.pricePerHour.toStringAsFixed(2)}',
+                                      CurrencyFormatter.format(billboard.pricePerHour),
                                       style: AppTypography.labelMd.copyWith(
                                         color: AppPallete.primaryContainer,
                                         fontWeight: FontWeight.w600,
@@ -201,7 +202,7 @@ class BillboardCard extends StatelessWidget {
                                   ]
                                 : [
                                     Text(
-                                      '\$${billboard.pricePerHour.toStringAsFixed(2)}',
+                                      CurrencyFormatter.format(billboard.pricePerHour),
                                       style: AppTypography.labelMd.copyWith(
                                         color: AppPallete.onSurfaceVariant,
                                         decoration: TextDecoration.lineThrough,
