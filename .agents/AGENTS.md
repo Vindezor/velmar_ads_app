@@ -36,6 +36,8 @@ Este proyecto utiliza **Clean Architecture** (Arquitectura Limpia) con **Flutter
 4.  **Gestión de Estados**:
     *   Usa `flutter_bloc`. Los Blocs se colocan en `presentation/bloc/` de su respectiva feature.
     *   Para estados compartidos globalmente (como autenticación e información básica del usuario activo), utiliza el cubit global `AppUserCubit` ubicado en `lib/core/common/cubits/app_user/`.
+    *   **Encapsulamiento de Dependencias en Blocs**: Las dependencias inyectadas en los constructores de los Blocs/Cubits deben definirse como variables finales privadas (ej: `final GetDashboardData _getDashboardData;`) e inicializarse mediante la lista de inicialización del constructor (ej: `: _getDashboardData = getDashboardData`). Se debe usar el comentario `// ignore_for_file: prefer_initializing_formals` al inicio del archivo para silenciar la advertencia del analizador de Dart.
+
 
 5.  **Enrutamiento (`go_router`)**:
     *   Registra las páginas en [app_router.dart](file:///d:/AMD/Escritorio/Velmar_Ads/Code/Flutter/velmar_ads/lib/core/router/app_router.dart).
