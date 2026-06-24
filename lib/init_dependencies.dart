@@ -9,11 +9,17 @@ import 'package:velmar_ads/features/auth/domain/usecases/current_user.dart';
 import 'package:velmar_ads/features/auth/domain/usecases/user_login.dart';
 import 'package:velmar_ads/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:velmar_ads/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:velmar_ads/features/dashboard/data/datasources/dashboard_remote_data_source.dart';
+import 'package:velmar_ads/features/dashboard/data/repositories/dashboard_repository_impl.dart';
+import 'package:velmar_ads/features/dashboard/domain/repository/dashboard_repository.dart';
+import 'package:velmar_ads/features/dashboard/domain/usecases/get_dashboard_data.dart';
+import 'package:velmar_ads/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   _initAuth();
+  _initDashboard();
   final supabase = await Supabase.initialize(
     url: AppSecrets.supabaseUrl,
     publishableKey: AppSecrets.supabasePublishableKey,
@@ -44,3 +50,21 @@ void _initAuth() {
       ),
     );
 }
+
+void _initDashboard() {
+  serviceLocator
+    ..registerFactory<DashboardRemoteDataSource>(
+      () => DashboardRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+    )
+    ..registerFactory<DashboardRepository>(
+      () => DashboardRepositoryImpl(remoteDataSource: serviceLocator()),
+    )
+    ..registerFactory(() => GetDashboardData(repository: serviceLocator()))
+    ..registerFactory(
+      () => DashboardBloc(
+        getDashboardData: serviceLocator(),
+        appUserCubit: serviceLocator(),
+      ),
+    );
+}
+

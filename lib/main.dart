@@ -4,6 +4,7 @@ import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:velmar_ads/core/router/app_router.dart';
 import 'package:velmar_ads/core/theme/theme.dart';
 import 'package:velmar_ads/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:velmar_ads/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:velmar_ads/init_dependencies.dart';
 
 void main() async {
@@ -14,11 +15,13 @@ void main() async {
       providers: [
         BlocProvider(create: (_) => serviceLocator<AuthBloc>()),
         BlocProvider(create: (_) => serviceLocator<AppUserCubit>()),
+        BlocProvider(create: (_) => serviceLocator<DashboardBloc>()),
       ],
       child: const MainApp(),
     ),
   );
 }
+
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
