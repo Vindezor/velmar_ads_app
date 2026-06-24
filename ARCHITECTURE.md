@@ -70,6 +70,8 @@ Toda la configuración de inyección de dependencias está centralizada en [init
 ### 2. Manejo de Estados (`flutter_bloc`)
 *   Para estados globales de sesión y datos persistentes a nivel de app, usamos **Cubits** (como `AppUserCubit` en `lib/core/common/cubits/app_user/`).
 *   Para lógica específica de formularios y pantallas complejas, usamos **Blocs** estructurados con eventos (`Event`) y estados (`State`).
+*   **Coordinación entre Blocs e Inyección Cruzada**: Si un Bloc de funcionalidad local necesita consultar información del usuario logueado (como el `userId`), se le debe inyectar el `AppUserCubit` en su constructor. La UI no debe responsabilizarse de extraer y pasar identificadores que ya están globalmente disponibles, delegando esa lógica al Bloc y cumpliendo con los principios SOLID de encapsulamiento y responsabilidad única.
+
 
 ### 3. Enrutamiento (`go_router`)
 La navegación está declarada en [app_router.dart](file:///d:/AMD/Escritorio/Velmar_Ads/Code/Flutter/velmar_ads/lib/core/router/app_router.dart).

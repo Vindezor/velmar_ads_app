@@ -50,6 +50,10 @@ Este proyecto utiliza **Clean Architecture** (Arquitectura Limpia) con **Flutter
         *   Espaciados: Usa los espaciados estandarizados en `AppSpacing`.
     *   Queda prohibido hardcodear colores o dimensiones arbitrarias sin justificación.
 
+7.  **Principios SOLID y Coordinación de Estados (Cubit/Bloc)**:
+    *   Sigue estrictamente los principios SOLID. Evita acoplar la UI con la lógica de sesión o negocio.
+    *   Si un Bloc o Cubit de una funcionalidad específica (ej. `DashboardBloc`) necesita consultar la sesión o la información del usuario logueado, inyecta `AppUserCubit` en su constructor.
+    *   Los eventos de carga de la UI no deben arrastrar parámetros que ya están disponibles en los estados globales (como el `userId`), delegando esa obtención de forma interna al Bloc mediante el Cubit inyectado.
 
 ---
 
