@@ -61,6 +61,7 @@ class BillboardDetailPage extends StatelessWidget {
                     resolutionW: b.resolutionW,
                     resolutionH: b.resolutionH,
                     acceptedFormats: b.acceptedFormats,
+                    maxFileSizeMb: b.maxFileSizeMb,
                   ),
                   const SizedBox(height: 24),
                 ],

@@ -5,19 +5,21 @@ class BillboardDetailSpecs extends StatelessWidget {
   final int? resolutionW;
   final int? resolutionH;
   final List<String> acceptedFormats;
+  final int? maxFileSizeMb;
 
   const BillboardDetailSpecs({
     super.key,
     this.resolutionW,
     this.resolutionH,
     required this.acceptedFormats,
+    this.maxFileSizeMb,
   });
 
   @override
   Widget build(BuildContext context) {
     final resolutionText = (resolutionW != null && resolutionH != null)
         ? '$resolutionW x $resolutionH px'
-        : '1920 x 1080 px';
+        : 'N/A';
 
     // Format list mapping (e.g. video/mp4 -> MP4, image/jpeg -> JPG, image/png -> PNG)
     final formats = acceptedFormats.map((mime) {
@@ -27,6 +29,8 @@ class BillboardDetailSpecs extends StatelessWidget {
       if (clean.contains('png')) return 'PNG';
       return clean.split('/').last.toUpperCase();
     }).toSet().join(', ');
+
+    final maxFileSizeText = maxFileSizeMb != null ? '$maxFileSizeMb MB' : 'N/A';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
@@ -58,19 +62,13 @@ class BillboardDetailSpecs extends StatelessWidget {
                 SpecListItem(
                   icon: Icons.video_file_outlined,
                   label: 'Formatos Soportados',
-                  value: formats.isNotEmpty ? formats : 'MP4, JPG, PNG',
+                  value: formats.isNotEmpty ? formats : 'N/A',
                   showDivider: true,
                 ),
-                const SpecListItem(
-                  icon: Icons.timer_outlined,
-                  label: 'Duración de Loop',
-                  value: '10 Segundos',
-                  showDivider: true,
-                ),
-                const SpecListItem(
-                  icon: Icons.wb_sunny_outlined,
-                  label: 'Brillo',
-                  value: '8,000 Nits (Auto)',
+                SpecListItem(
+                  icon: Icons.insert_drive_file_outlined,
+                  label: 'Tamaño Máximo de Archivo',
+                  value: maxFileSizeText,
                   showDivider: false,
                 ),
               ],

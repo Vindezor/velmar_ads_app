@@ -17,6 +17,7 @@ class BillboardModel extends Billboard {
     super.resolutionW,
     super.resolutionH,
     required super.acceptedFormats,
+    super.maxFileSizeMb,
   });
 
   factory BillboardModel.fromJson(Map<String, dynamic> json) {
@@ -53,6 +54,7 @@ class BillboardModel extends Billboard {
               ?.map((e) => e.toString())
               .toList() ??
           const ['image/jpeg', 'image/png', 'video/mp4'],
+      maxFileSizeMb: json['max_file_size_mb'] as int?,
     );
   }
 

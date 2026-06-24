@@ -14,6 +14,7 @@ class Billboard {
   final int? resolutionW;
   final int? resolutionH;
   final List<String> acceptedFormats;
+  final int? maxFileSizeMb;
 
   Billboard({
     required this.id,
@@ -31,5 +32,6 @@ class Billboard {
     this.resolutionW,
     this.resolutionH,
     required this.acceptedFormats,
+    this.maxFileSizeMb,
   });
 }
