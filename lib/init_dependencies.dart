@@ -14,12 +14,18 @@ import 'package:velmar_ads/features/dashboard/data/repositories/dashboard_reposi
 import 'package:velmar_ads/features/dashboard/domain/repository/dashboard_repository.dart';
 import 'package:velmar_ads/features/dashboard/domain/usecases/get_dashboard_data.dart';
 import 'package:velmar_ads/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:velmar_ads/features/bookings/data/datasources/bookings_remote_data_source.dart';
+import 'package:velmar_ads/features/bookings/data/repositories/bookings_repository_impl.dart';
+import 'package:velmar_ads/features/bookings/domain/repository/bookings_repository.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/get_billboard_bookings.dart';
+import 'package:velmar_ads/features/bookings/presentation/cubit/booking_availability_cubit.dart';
 
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   _initAuth();
   _initDashboard();
+  _initBookings();
   final supabase = await Supabase.initialize(
     url: AppSecrets.supabaseUrl,
     publishableKey: AppSecrets.supabasePublishableKey,
@@ -66,5 +72,17 @@ void _initDashboard() {
         appUserCubit: serviceLocator(),
       ),
     );
+}
+
+void _initBookings() {
+  serviceLocator
+    ..registerFactory<BookingsRemoteDataSource>(
+      () => BookingsRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+    )
+    ..registerFactory<BookingsRepository>(
+      () => BookingsRepositoryImpl(remoteDataSource: serviceLocator()),
+    )
+    ..registerFactory(() => GetBillboardBookings(bookingsRepository: serviceLocator()))
+    ..registerFactory(() => BookingAvailabilityCubit(getBillboardBookings: serviceLocator()));
 }
 

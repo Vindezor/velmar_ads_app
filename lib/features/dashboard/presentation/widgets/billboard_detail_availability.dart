@@ -1,11 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
+import 'package:velmar_ads/features/bookings/domain/entities/booking.dart';
 
 class BillboardDetailAvailability extends StatelessWidget {
-  const BillboardDetailAvailability({super.key});
+  final List<Booking> bookings;
+
+  const BillboardDetailAvailability({
+    super.key,
+    required this.bookings,
+  });
+
+  String _getMonthName(int month) {
+    const months = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    return months[month - 1];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    final weekday = today.weekday;
+    final thisMonday = todayStart.subtract(Duration(days: weekday - 1));
+
+    final List<DateTime> week1Dates = List.generate(7, (i) => thisMonday.add(Duration(days: i)));
+    final List<DateTime> week2Dates = List.generate(7, (i) => thisMonday.add(Duration(days: i + 7)));
+
+    final startDay = thisMonday;
+    final endDay = thisMonday.add(const Duration(days: 13));
+    final String dateRangeLabel;
+
+    if (startDay.month == endDay.month && startDay.year == endDay.year) {
+      dateRangeLabel = '${_getMonthName(startDay.month)} ${startDay.year}';
+    } else if (startDay.year == endDay.year) {
+      dateRangeLabel = '${_getMonthName(startDay.month)} - ${_getMonthName(endDay.month)} ${startDay.year}';
+    } else {
+      dateRangeLabel = '${_getMonthName(startDay.month)} ${startDay.year} - ${_getMonthName(endDay.month)} ${endDay.year}';
+    }
+
+    DayStatus getDayStatus(DateTime date) {
+      if (date.isBefore(todayStart)) {
+        return DayStatus.inactive;
+      }
+      final dayStart = DateTime(date.year, date.month, date.day, 0, 0, 0);
+      final dayEnd = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
+      final hasBookings = bookings.any((booking) =>
+          booking.startTime.isBefore(dayEnd) && booking.endTime.isAfter(dayStart));
+      return hasBookings ? DayStatus.busy : DayStatus.available;
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
       child: Column(
@@ -23,7 +68,7 @@ class BillboardDetailAvailability extends StatelessWidget {
                 ),
               ),
               Text(
-                'Octubre 2023',
+                dateRangeLabel,
                 style: AppTypography.labelSm.copyWith(
                   color: AppPallete.secondary,
                 ),
@@ -55,30 +100,14 @@ class BillboardDetailAvailability extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 // Calendar Grid Row-by-Row
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    DaySquare(status: DayStatus.inactive),
-                    DaySquare(status: DayStatus.inactive),
-                    DaySquare(status: DayStatus.available),
-                    DaySquare(status: DayStatus.available),
-                    DaySquare(status: DayStatus.available),
-                    DaySquare(status: DayStatus.busy),
-                    DaySquare(status: DayStatus.busy),
-                  ],
+                  children: week1Dates.map((date) => DaySquare(status: getDayStatus(date))).toList(),
                 ),
                 const SizedBox(height: 6),
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    DaySquare(status: DayStatus.available),
-                    DaySquare(status: DayStatus.available),
-                    DaySquare(status: DayStatus.available),
-                    DaySquare(status: DayStatus.busy),
-                    DaySquare(status: DayStatus.busy),
-                    DaySquare(status: DayStatus.busy),
-                    DaySquare(status: DayStatus.busy),
-                  ],
+                  children: week2Dates.map((date) => DaySquare(status: getDayStatus(date))).toList(),
                 ),
                 const SizedBox(height: 16),
                 // Legend

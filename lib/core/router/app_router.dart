@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:velmar_ads/core/common/widgets/navigation_shell.dart';
@@ -12,6 +13,7 @@ import 'package:velmar_ads/features/dashboard/presentation/pages/billboard_detai
 import 'package:velmar_ads/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:velmar_ads/features/library/presentation/pages/library_page.dart';
 import 'package:velmar_ads/features/profile/presentation/pages/profile_page.dart';
+import 'package:velmar_ads/features/bookings/presentation/cubit/booking_availability_cubit.dart';
 import 'package:velmar_ads/init_dependencies.dart';
 
 // Un pequeño puente (Helper) para convertir el Stream del Cubit en un Listenable que GoRouter entienda
@@ -92,7 +94,11 @@ final GoRouter appRouter = GoRouter(
                   name: 'billboard-detail',
                   builder: (context, state) {
                     final billboard = state.extra as Billboard?;
-                    return BillboardDetailPage(billboard: billboard);
+                    final id = state.pathParameters['id'] ?? '';
+                    return BlocProvider(
+                      create: (context) => serviceLocator<BookingAvailabilityCubit>()..fetchAvailability(id),
+                      child: BillboardDetailPage(billboard: billboard),
+                    );
                   },
                   routes: [
                     GoRoute(
@@ -100,7 +106,11 @@ final GoRouter appRouter = GoRouter(
                       name: 'select-schedule',
                       builder: (context, state) {
                         final billboard = state.extra as Billboard?;
-                        return ScheduleSelectionPage(billboard: billboard);
+                        final id = state.pathParameters['id'] ?? '';
+                        return BlocProvider(
+                          create: (context) => serviceLocator<BookingAvailabilityCubit>()..fetchAvailability(id),
+                          child: ScheduleSelectionPage(billboard: billboard),
+                        );
                       },
                     ),
                   ],

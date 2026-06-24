@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/core/utils/currency_formatter.dart';
+import 'package:velmar_ads/features/bookings/domain/entities/booking.dart';
 
 class ScheduleTimeline extends StatelessWidget {
   final List<int> selectedSlots;
   final ValueChanged<int> onSlotToggled;
   final double hourlyPrice;
   final String dateLabel;
+  final List<Booking> bookings;
+  final DateTime selectedDate;
 
   const ScheduleTimeline({
     super.key,
@@ -14,6 +17,8 @@ class ScheduleTimeline extends StatelessWidget {
     required this.onSlotToggled,
     required this.hourlyPrice,
     required this.dateLabel,
+    required this.bookings,
+    required this.selectedDate,
   });
 
   @override
@@ -66,7 +71,11 @@ class ScheduleTimeline extends StatelessWidget {
                 separatorBuilder: (context, index) => const SizedBox(width: 10),
                 itemBuilder: (context, index) {
                   final hour = hours[index];
-                  final isOccupied = hour == 8 || hour == 9;
+                  final isOccupied = bookings.any((booking) {
+                    final slotStart = DateTime(selectedDate.year, selectedDate.month, selectedDate.day, hour);
+                    final slotEnd = DateTime(selectedDate.year, selectedDate.month, selectedDate.day, hour + 1);
+                    return booking.startTime.isBefore(slotEnd) && booking.endTime.isAfter(slotStart);
+                  });
                   final isSelected = selectedSlots.contains(hour);
 
                   return HourSlotCard(

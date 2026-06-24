@@ -1,22 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
+import 'package:velmar_ads/features/bookings/domain/entities/booking.dart';
 
-class ScheduleCalendar extends StatelessWidget {
+class CalendarDayData {
+  final DateTime date;
+  final bool isCurrentMonth;
+
+  CalendarDayData({
+    required this.date,
+    required this.isCurrentMonth,
+  });
+}
+
+class ScheduleCalendar extends StatefulWidget {
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDateChanged;
+  final List<Booking> bookings;
 
   const ScheduleCalendar({
     super.key,
     required this.selectedDate,
     required this.onDateChanged,
+    required this.bookings,
   });
 
-  bool _isDaySelected(int day) {
-    return selectedDate.day == day && selectedDate.month == 10 && selectedDate.year == 2023;
+  @override
+  State<ScheduleCalendar> createState() => _ScheduleCalendarState();
+}
+
+class _ScheduleCalendarState extends State<ScheduleCalendar> {
+  late DateTime _focusedMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusedMonth = DateTime(widget.selectedDate.year, widget.selectedDate.month, 1);
+  }
+
+  @override
+  void didUpdateWidget(covariant ScheduleCalendar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedDate != widget.selectedDate) {
+      _focusedMonth = DateTime(widget.selectedDate.year, widget.selectedDate.month, 1);
+    }
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    return months[month - 1];
+  }
+
+  void _previousMonth() {
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month - 1, 1);
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      _focusedMonth = DateTime(_focusedMonth.year, _focusedMonth.month + 1, 1);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final year = _focusedMonth.year;
+    final month = _focusedMonth.month;
+
+    // Number of days in current month
+    final totalDays = DateTime(year, month + 1, 0).day;
+
+    // Weekday of the 1st of the month (1 = Mon, 7 = Sun)
+    final firstWeekday = DateTime(year, month, 1).weekday;
+
+    // Monday as the first day of the week
+    final prefixEmptySlots = firstWeekday - 1;
+
+    final List<CalendarDayData> gridDays = [];
+
+    // 1. Previous month padding days
+    final prevMonth = month == 1 ? 12 : month - 1;
+    final prevYear = month == 1 ? year - 1 : year;
+    final prevMonthDaysCount = DateTime(prevYear, prevMonth + 1, 0).day;
+    for (int i = prefixEmptySlots - 1; i >= 0; i--) {
+      final dayNum = prevMonthDaysCount - i;
+      gridDays.add(CalendarDayData(
+        date: DateTime(prevYear, prevMonth, dayNum),
+        isCurrentMonth: false,
+      ));
+    }
+
+    // 2. Current month days
+    for (int i = 1; i <= totalDays; i++) {
+      gridDays.add(CalendarDayData(
+        date: DateTime(year, month, i),
+        isCurrentMonth: true,
+      ));
+    }
+
+    // 3. Next month padding days
+    final nextMonth = month == 12 ? 1 : month + 1;
+    final nextYear = month == 12 ? year + 1 : year;
+    final remainingSlots = (7 - (gridDays.length % 7)) % 7;
+    for (int i = 1; i <= remainingSlots; i++) {
+      gridDays.add(CalendarDayData(
+        date: DateTime(nextYear, nextMonth, i),
+        isCurrentMonth: false,
+      ));
+    }
+
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+
+    final List<List<CalendarDayData>> weeks = [];
+    for (int i = 0; i < gridDays.length; i += 7) {
+      weeks.add(gridDays.sublist(i, i + 7));
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
       child: Container(
@@ -40,7 +143,7 @@ class ScheduleCalendar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Octubre 2023',
+                  '${_getMonthName(month)} $year',
                   style: AppTypography.headlineMd.copyWith(
                     color: AppPallete.onSurface,
                     fontWeight: FontWeight.w600,
@@ -50,11 +153,11 @@ class ScheduleCalendar extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.chevron_left, color: AppPallete.secondary),
-                      onPressed: () {},
+                      onPressed: _previousMonth,
                     ),
                     IconButton(
                       icon: const Icon(Icons.chevron_right, color: AppPallete.secondary),
-                      onPressed: () {},
+                      onPressed: _nextMonth,
                     ),
                   ],
                 ),
@@ -77,128 +180,34 @@ class ScheduleCalendar extends StatelessWidget {
             const SizedBox(height: 8),
             // Calendar grid rows
             Column(
-              children: [
-                // Week 1
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    const CalendarDaySquare(day: null, isInactive: true),
-                    const CalendarDaySquare(day: null, isInactive: true),
-                    const CalendarDaySquare(day: 1, isInactive: true),
-                    const CalendarDaySquare(day: 2, isInactive: true),
-                    const CalendarDaySquare(day: 3, isInactive: true),
-                    const CalendarDaySquare(day: 4, isInactive: true),
-                    const CalendarDaySquare(day: 5, isInactive: true),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                // Week 2
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    const CalendarDaySquare(day: 6, isInactive: true),
-                    const CalendarDaySquare(day: 7, isInactive: true),
-                    const CalendarDaySquare(day: 8, isInactive: true),
-                    const CalendarDaySquare(day: 9, isInactive: true),
-                    const CalendarDaySquare(day: 10, isInactive: true),
-                    const CalendarDaySquare(day: 11, isInactive: true),
-                    const CalendarDaySquare(day: 12, isInactive: true),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                // Week 3
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    CalendarDaySquare(
-                      day: 13,
-                      isSelected: _isDaySelected(13),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 13)),
-                    ),
-                    CalendarDaySquare(
-                      day: 14,
-                      isSelected: _isDaySelected(14),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 14)),
-                    ),
-                    CalendarDaySquare(
-                      day: 15,
-                      isPromo: true,
-                      isSelected: _isDaySelected(15),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 15)),
-                    ),
-                    CalendarDaySquare(
-                      day: 16,
-                      isPromo: true,
-                      isSelected: _isDaySelected(16),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 16)),
-                    ),
-                    CalendarDaySquare(
-                      day: 17,
-                      isPromo: true,
-                      isSelected: _isDaySelected(17),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 17)),
-                    ),
-                    CalendarDaySquare(
-                      day: 18,
-                      isPromo: true,
-                      isSelected: _isDaySelected(18),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 18)),
-                    ),
-                    CalendarDaySquare(
-                      day: 19,
-                      isPromo: true,
-                      isSelected: _isDaySelected(19),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 19)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                // Week 4
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    CalendarDaySquare(
-                      day: 20,
-                      isPromo: true,
-                      isSelected: _isDaySelected(20),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 20)),
-                    ),
-                    CalendarDaySquare(
-                      day: 21,
-                      isPromo: true,
-                      isSelected: _isDaySelected(21),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 21)),
-                    ),
-                    CalendarDaySquare(
-                      day: 22,
-                      isPromo: true,
-                      isSelected: _isDaySelected(22),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 22)),
-                    ),
-                    CalendarDaySquare(
-                      day: 23,
-                      isPromo: true,
-                      isSelected: _isDaySelected(23),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 23)),
-                    ),
-                    CalendarDaySquare(
-                      day: 24,
-                      isSelected: _isDaySelected(24),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 24)),
-                    ),
-                    CalendarDaySquare(
-                      day: 25,
-                      isSelected: _isDaySelected(25),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 25)),
-                    ),
-                    CalendarDaySquare(
-                      day: 26,
-                      isSelected: _isDaySelected(26),
-                      onTap: () => onDateChanged(DateTime(2023, 10, 26)),
-                    ),
-                  ],
-                ),
-              ],
+              children: weeks.map((week) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: week.map((dayData) {
+                      final isInactive = !dayData.isCurrentMonth || dayData.date.isBefore(todayStart);
+                      final isSelected = widget.selectedDate.year == dayData.date.year &&
+                                         widget.selectedDate.month == dayData.date.month &&
+                                         widget.selectedDate.day == dayData.date.day;
+
+                      final hasBookings = widget.bookings.any((booking) {
+                        final dayStart = DateTime(dayData.date.year, dayData.date.month, dayData.date.day, 0, 0, 0);
+                        final dayEnd = DateTime(dayData.date.year, dayData.date.month, dayData.date.day, 23, 59, 59, 999);
+                        return booking.startTime.isBefore(dayEnd) && booking.endTime.isAfter(dayStart);
+                      });
+
+                      return CalendarDaySquare(
+                        day: dayData.date.day,
+                        isInactive: isInactive,
+                        isSelected: isSelected,
+                        isOccupied: !isInactive && hasBookings,
+                        onTap: () => widget.onDateChanged(dayData.date),
+                      );
+                    }).toList(),
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 16),
             // Legend
@@ -244,16 +253,16 @@ class CalendarHeaderDay extends StatelessWidget {
 class CalendarDaySquare extends StatelessWidget {
   final int? day;
   final bool isInactive;
-  final bool isPromo;
   final bool isSelected;
+  final bool isOccupied;
   final VoidCallback? onTap;
 
   const CalendarDaySquare({
     super.key,
     this.day,
     this.isInactive = false,
-    this.isPromo = false,
     this.isSelected = false,
+    this.isOccupied = false,
     this.onTap,
   });
 
@@ -275,7 +284,11 @@ class CalendarDaySquare extends StatelessWidget {
       textColor = AppPallete.onPrimaryFixed;
       fontWeight = FontWeight.bold;
       border = Border.all(color: AppPallete.primary, width: 2.0);
-    } else if (isPromo) {
+    } else if (isOccupied) {
+      bgColor = Colors.transparent;
+      textColor = AppPallete.secondary;
+      border = Border.all(color: AppPallete.outlineVariant);
+    } else {
       bgColor = const Color(0xFFE8F5E9);
       textColor = const Color(0xFF2E7D32);
     }
