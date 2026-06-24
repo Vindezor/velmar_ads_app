@@ -94,6 +94,9 @@ El desarrollo visual de las interfaces en **Velmar Ads** sigue un flujo estructu
     *   **Bordes y Radios**: Utilizar los radios predefinidos en `AppRadius` (ej. `AppRadius.md` para campos de entrada y botones, `AppRadius.lg` para tarjetas).
     *   **Espaciados**: Utilizar las dimensiones de `AppSpacing` para mantener la consistencia vertical y horizontal.
 *   **Componentes Material Design**: Utilizar y extender de forma limpia los componentes proporcionados por Flutter Material (ej. `Card`, `ElevatedButton`, `OutlinedButton`, `TextFormField`, etc.) que ya están pre-estilizados en el tema central.
+*   **Descomposición de Widgets Grandes (SRP)**: Los métodos `build` de las páginas de UI no deben volverse gigantescos. Debes estructurar la UI dividiendo los estados o secciones en métodos privados auxiliares (ej. `_buildAppBar()`, `_buildLoadedView(data)`) o extraerlos a widgets separados.
+*   **Extracción de Utilidades de Formato (SRP)**: Ninguna lógica de formato compleja (como formatear dinero, fechas o números) debe estar acoplada a las clases de la UI. Estas deben extraerse a clases de utilidad pura bajo `lib/core/utils/` (ej: `CurrencyFormatter`).
+*   **Manejo de Estados con Switch de Dart 3 (OCP)**: Al consumir estados de Blocs sellados (`sealed class`), utiliza expresiones `switch` de Dart 3 en lugar de cadenas de `if/else if`. Esto provee comprobación de exhaustividad en tiempo de compilación y garantiza que se cumpla el principio Abierto/Cerrado ante nuevos estados.
 
 ---
 

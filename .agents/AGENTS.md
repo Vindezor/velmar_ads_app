@@ -51,7 +51,9 @@ Este proyecto utiliza **Clean Architecture** (Arquitectura Limpia) con **Flutter
         *   Bordes y Radios: Usa los valores definidos en `AppRadius` (ej. `AppRadius.md`).
         *   Espaciados: Usa los espaciados estandarizados en `AppSpacing`.
     *   Queda prohibido hardcodear colores o dimensiones arbitrarias sin justificación.
-
+    *   **Descomposición de Widgets (SRP y Mantenibilidad)**: Queda estrictamente prohibido construir o acumular lógica de sub-widgets mediante métodos o funciones auxiliares privadas (ej. `_buildAppBar()`, `_buildLoadedView()`, `_buildSubHeader()`) dentro de la clase principal de la página. Toda estructura de componentes de UI, incluso las más básicas como el AppBar o las vistas cargadas/errores, debe extraerse obligatoriamente a archivos separados dentro de la carpeta `widgets/` de la característica y estructurarse como clases independientes (`StatelessWidget` o `StatefulWidget`) para optimizar el ciclo de vida y reconstrucción de widgets de Flutter.
+    *   **Extracción de Utilidades de Formato (SRP)**: Ninguna lógica de formato compleja (como formatear dinero, fechas o números) debe estar acoplada a las clases de la UI. Estas deben extraerse a clases de utilidad pura bajo `lib/core/utils/` (ej: `CurrencyFormatter`).
+    *   **Manejo de Estados con Switch de Dart 3 (OCP)**: Al consumir estados de Blocs sellados (`sealed class`), utiliza expresiones `switch` de Dart 3 en lugar de cadenas de `if/else if`. Esto provee comprobación de exhaustividad en tiempo de compilación y garantiza que se cumpla el principio Abierto/Cerrado ante nuevos estados.
 7.  **Principios SOLID y Coordinación de Estados (Cubit/Bloc)**:
     *   Sigue estrictamente los principios SOLID. Evita acoplar la UI con la lógica de sesión o negocio.
     *   Si un Bloc o Cubit de una funcionalidad específica (ej. `DashboardBloc`) necesita consultar la sesión o la información del usuario logueado, inyecta `AppUserCubit` en su constructor.
