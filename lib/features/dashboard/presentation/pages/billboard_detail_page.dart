@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
-import 'package:velmar_ads/core/utils/show_snackbar.dart';
 import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
 import 'package:velmar_ads/features/dashboard/presentation/widgets/billboard_detail_action_bar.dart';
 import 'package:velmar_ads/features/dashboard/presentation/widgets/billboard_detail_app_bar.dart';
@@ -72,9 +72,10 @@ class BillboardDetailPage extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: BillboardDetailActionBar(
               onPressed: () {
-                showSnackBar(
-                  context: context,
-                  message: 'Seleccionar horario para ${b.name}',
+                context.pushNamed(
+                  'select-schedule',
+                  pathParameters: {'id': b.id},
+                  extra: b,
                 );
               },
             ),

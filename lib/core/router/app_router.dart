@@ -6,6 +6,7 @@ import 'package:velmar_ads/core/router/app_routes.dart';
 import 'package:velmar_ads/features/auth/presentation/pages/login_page.dart';
 import 'package:velmar_ads/features/auth/presentation/pages/signup_page.dart';
 import 'package:velmar_ads/features/bookings/presentation/pages/bookings_page.dart';
+import 'package:velmar_ads/features/bookings/presentation/pages/schedule_selection_page.dart';
 import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
 import 'package:velmar_ads/features/dashboard/presentation/pages/billboard_detail_page.dart';
 import 'package:velmar_ads/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -93,6 +94,16 @@ final GoRouter appRouter = GoRouter(
                     final billboard = state.extra as Billboard?;
                     return BillboardDetailPage(billboard: billboard);
                   },
+                  routes: [
+                    GoRoute(
+                      path: 'book',
+                      name: 'select-schedule',
+                      builder: (context, state) {
+                        final billboard = state.extra as Billboard?;
+                        return ScheduleSelectionPage(billboard: billboard);
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
