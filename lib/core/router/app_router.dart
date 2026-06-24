@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
-import 'package:velmar_ads/init_dependencies.dart';
+import 'package:velmar_ads/core/common/widgets/navigation_shell.dart';
 import 'package:velmar_ads/features/auth/presentation/pages/login_page.dart';
 import 'package:velmar_ads/features/auth/presentation/pages/signup_page.dart';
+import 'package:velmar_ads/features/bookings/presentation/pages/bookings_page.dart';
 import 'package:velmar_ads/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:velmar_ads/features/library/presentation/pages/library_page.dart';
+import 'package:velmar_ads/features/profile/presentation/pages/profile_page.dart';
+import 'package:velmar_ads/init_dependencies.dart';
 
 // Un pequeño puente (Helper) para convertir el Stream del Cubit en un Listenable que GoRouter entienda
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -65,10 +69,50 @@ final GoRouter appRouter = GoRouter(
       name: 'register',
       builder: (context, state) => const SignUpPage(),
     ),
-    GoRoute(
-      path: '/dashboard',
-      name: 'dashboard',
-      builder: (context, state) => const DashboardPage(),
+    
+    // StatefulShellRoute mantiene la barra inferior compartida y el estado de cada pestaña
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return NavigationShell(navigationShell: navigationShell);
+      },
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/dashboard',
+              name: 'dashboard',
+              builder: (context, state) => const DashboardPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/bookings',
+              name: 'bookings',
+              builder: (context, state) => const BookingsPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/library',
+              name: 'library',
+              builder: (context, state) => const LibraryPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/profile',
+              name: 'profile',
+              builder: (context, state) => const ProfilePage(),
+            ),
+          ],
+        ),
+      ],
     ),
   ],
 );
