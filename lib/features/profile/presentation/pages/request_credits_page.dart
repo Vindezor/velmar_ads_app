@@ -132,8 +132,8 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
             context.pop();
           } else if (state is ProfileRequestError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
+              const SnackBar(
+                content: Text('Hubo un error al procesar tu solicitud. Por favor, inténtalo de nuevo.'),
                 backgroundColor: AppPallete.error,
               ),
             );

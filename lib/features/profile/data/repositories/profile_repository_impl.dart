@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_initializing_formals
 
-import 'dart:developer' as dev;
 import 'dart:typed_data';
 import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/exceptions.dart';
@@ -84,10 +83,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       if (isUploaded) {
         try {
           await _remoteDataSource.deletePaymentProof(path);
-        } catch (cleanupError) {
-          // Log clean up error silently without overriding primary exception
-          dev.log('Error de limpieza en Supabase Storage: $cleanupError');
-        }
+        } catch (_) {}
       }
       return left(Failure(e.message));
     }
