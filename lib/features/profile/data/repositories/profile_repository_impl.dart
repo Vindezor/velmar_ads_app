@@ -46,9 +46,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
     required String userId,
     String? paymentNotes,
   }) async {
+    final extension = fileName.split('.').last;
+    final path = '$userId/${DateTime.now().millisecondsSinceEpoch}.$extension';
+    bool isUploaded = false;
+
     try {
       // 1. Upload payment proof
-      final proofUrl = await _remoteDataSource.uploadPaymentProof(filePath, fileName, userId);
+      final proofUrl = await _remoteDataSource.uploadPaymentProof(
+        filePath: filePath,
+        path: path,
+      );
+      isUploaded = true;
 
       // 2. Generate unique order number (e.g. CR-timestamp)
       final orderNumber = 'CR-${DateTime.now().millisecondsSinceEpoch}';
@@ -71,6 +79,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
       await _remoteDataSource.createCreditRequest(request);
       return right(null);
     } on ServerException catch (e) {
+      if (isUploaded) {
+        try {
+          await _remoteDataSource.deletePaymentProof(path);
+        } catch (_) {}
+      }
       return left(Failure(e.message));
     }
   }

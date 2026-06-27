@@ -7,7 +7,11 @@ import 'package:velmar_ads/features/profile/data/models/credit_request_model.dar
 abstract interface class ProfileRemoteDataSource {
   Future<double> getUserCredits(String userId);
   Future<List<MovementModel>> getMovementHistory(String userId);
-  Future<String> uploadPaymentProof(String filePath, String fileName, String userId);
+  Future<String> uploadPaymentProof({
+    required String filePath,
+    required String path,
+  });
+  Future<void> deletePaymentProof(String path);
   Future<void> createCreditRequest(CreditRequestModel request);
   Future<List<CreditRequestModel>> getCreditRequests(String userId);
 }
@@ -48,17 +52,27 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<String> uploadPaymentProof(String filePath, String fileName, String userId) async {
+  Future<String> uploadPaymentProof({
+    required String filePath,
+    required String path,
+  }) async {
     try {
       final file = File(filePath);
       final fileBytes = await file.readAsBytes();
-      final extension = fileName.split('.').last;
-      final path = '$userId/${DateTime.now().millisecondsSinceEpoch}.$extension';
       
       await supabaseClient.storage.from('payment-proofs').uploadBinary(path, fileBytes);
       return supabaseClient.storage.from('payment-proofs').getPublicUrl(path);
     } catch (e) {
       throw ServerException('Error al subir comprobante a Supabase (payment-proofs): $e');
+    }
+  }
+
+  @override
+  Future<void> deletePaymentProof(String path) async {
+    try {
+      await supabaseClient.storage.from('payment-proofs').remove([path]);
+    } catch (e) {
+      throw ServerException('Error al eliminar comprobante de Supabase (payment-proofs): $e');
     }
   }
 
