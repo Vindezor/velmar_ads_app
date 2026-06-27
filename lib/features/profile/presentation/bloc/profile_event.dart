@@ -11,13 +11,13 @@ final class ProfileResetState extends ProfileEvent {}
 
 final class ProfileSubmitRequest extends ProfileEvent {
   final double amount;
-  final String filePath;
+  final Uint8List fileBytes;
   final String fileName;
   final String? paymentNotes;
 
   ProfileSubmitRequest({
     required this.amount,
-    required this.filePath,
+    required this.fileBytes,
     required this.fileName,
     this.paymentNotes,
   });

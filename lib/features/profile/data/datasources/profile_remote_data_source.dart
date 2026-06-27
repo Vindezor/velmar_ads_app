@@ -1,4 +1,5 @@
-import 'dart:io';
+import 'dart:developer' as dev;
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:velmar_ads/core/error/exceptions.dart';
 import 'package:velmar_ads/features/profile/data/models/movement_model.dart';
@@ -8,7 +9,7 @@ abstract interface class ProfileRemoteDataSource {
   Future<double> getUserCredits(String userId);
   Future<List<MovementModel>> getMovementHistory(String userId);
   Future<String> uploadPaymentProof({
-    required String filePath,
+    required Uint8List fileBytes,
     required String path,
   });
   Future<void> deletePaymentProof(String path);
@@ -53,16 +54,14 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<String> uploadPaymentProof({
-    required String filePath,
+    required Uint8List fileBytes,
     required String path,
   }) async {
     try {
-      final file = File(filePath);
-      final fileBytes = await file.readAsBytes();
-      
       await supabaseClient.storage.from('payment-proofs').uploadBinary(path, fileBytes);
       return supabaseClient.storage.from('payment-proofs').getPublicUrl(path);
     } catch (e) {
+      dev.log('Error al subir comprobante a Supabase (payment-proofs): $e');
       throw ServerException('Error al subir comprobante a Supabase (payment-proofs): $e');
     }
   }

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/failures.dart';
 import 'package:velmar_ads/features/profile/domain/entities/profile_details.dart';
@@ -8,7 +9,7 @@ abstract interface class ProfileRepository {
   
   Future<Either<Failure, void>> submitCreditRequest({
     required double amount,
-    required String filePath,
+    required Uint8List fileBytes,
     required String fileName,
     required String userId,
     String? paymentNotes,

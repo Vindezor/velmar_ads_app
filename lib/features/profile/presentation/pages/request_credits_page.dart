@@ -18,7 +18,7 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
   final TextEditingController _amountController = TextEditingController(text: '1000');
   double _selectedAmount = 1000;
   String? _selectedFileName;
-  String? _selectedFilePath;
+  Uint8List? _selectedFileBytes;
 
   @override
   void dispose() {
@@ -53,11 +53,12 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
         source: ImageSource.gallery,
         imageQuality: 85,
       );
-
+ 
       if (image != null) {
+        final bytes = await image.readAsBytes();
         setState(() {
           _selectedFileName = image.name;
-          _selectedFilePath = image.path;
+          _selectedFileBytes = bytes;
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -73,21 +74,21 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
       }
     }
   }
-
+ 
   void _removeFile() {
     setState(() {
       _selectedFileName = null;
-      _selectedFilePath = null;
+      _selectedFileBytes = null;
     });
   }
-
+ 
   void _copyClabe() {
     Clipboard.setData(const ClipboardData(text: '002180012345678901'));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('CLABE copiada al portapapeles.')),
     );
   }
-
+ 
   void _onSubmit(BuildContext context) {
     if (_selectedAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -95,18 +96,18 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
       );
       return;
     }
-
-    if (_selectedFileName == null || _selectedFilePath == null) {
+ 
+    if (_selectedFileName == null || _selectedFileBytes == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor, sube el comprobante de pago.')),
       );
       return;
     }
-
+ 
     context.read<ProfileBloc>().add(
           ProfileSubmitRequest(
             amount: _selectedAmount,
-            filePath: _selectedFilePath!,
+            fileBytes: _selectedFileBytes!,
             fileName: _selectedFileName!,
           ),
         );

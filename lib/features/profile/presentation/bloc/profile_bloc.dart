@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_initializing_formals
 
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
@@ -68,7 +69,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     final result = await _submitCreditRequest(
       SubmitCreditRequestParams(
         amount: event.amount,
-        filePath: event.filePath,
+        fileBytes: event.fileBytes,
         fileName: event.fileName,
         userId: userState.user.id,
         paymentNotes: event.paymentNotes,
