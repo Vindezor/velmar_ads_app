@@ -78,36 +78,46 @@ class ProfileView extends StatelessWidget {
                     ],
                   );
 
-                  return SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.containerPadding,
-                        vertical: AppSpacing.stackLg,
-                      ),
-                      child: Center(
-                        child: Container(
-                          constraints: const BoxConstraints(
-                            maxWidth: AppSpacing.maxWidth,
-                          ),
-                          child: isWide
-                              ? Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 5,
-                                      child: leftSide,
-                                    ),
-                                    const SizedBox(width: AppSpacing.stackLg),
-                                    Expanded(
-                                      flex: 7,
-                                      child: ProfileMovementList(
-                                        credits: details.credits,
-                                        movements: details.movements,
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      final bloc = context.read<ProfileBloc>();
+                      bloc.add(ProfileLoadDetails());
+                      // Wait for the state to transition out of loading or completed
+                      await bloc.stream.firstWhere((state) => state is! ProfileLoading);
+                    },
+                    color: AppPallete.primary,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.containerPadding,
+                          vertical: AppSpacing.stackLg,
+                        ),
+                        child: Center(
+                          child: Container(
+                            constraints: const BoxConstraints(
+                              maxWidth: AppSpacing.maxWidth,
+                            ),
+                            child: isWide
+                                ? Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        flex: 5,
+                                        child: leftSide,
                                       ),
-                                    ),
-                                  ],
-                                )
-                              : leftSide,
+                                      const SizedBox(width: AppSpacing.stackLg),
+                                      Expanded(
+                                        flex: 7,
+                                        child: ProfileMovementList(
+                                          credits: details.credits,
+                                          movements: details.movements,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : leftSide,
+                          ),
                         ),
                       ),
                     ),

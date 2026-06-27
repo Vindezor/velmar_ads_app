@@ -51,13 +51,31 @@ class ProfileBalanceCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'SALDO ACTUAL',
-                style: AppTypography.labelMd.copyWith(
-                  color: AppPallete.secondary,
-                  letterSpacing: 1.5,
-                  fontSize: 11,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'SALDO ACTUAL',
+                    style: AppTypography.labelMd.copyWith(
+                      color: AppPallete.secondary,
+                      letterSpacing: 1.5,
+                      fontSize: 11,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      context.read<ProfileBloc>().add(ProfileLoadDetails());
+                    },
+                    icon: const Icon(
+                      Icons.refresh,
+                      size: 16,
+                      color: AppPallete.secondary,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    tooltip: 'Actualizar saldo',
+                  ),
+                ],
               ),
               const SizedBox(height: AppSpacing.stackSm),
               Text(
