@@ -46,15 +46,32 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
     }
   }
 
-  void _simulateFileUpload() {
-    setState(() {
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      _selectedFileName = 'comprobante_transferencia_$timestamp.pdf';
-      _selectedFilePath = '/tmp/simulated_comprobante.pdf';
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Comprobante seleccionado con éxito.')),
-    );
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedFileName = image.name;
+          _selectedFilePath = image.path;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Comprobante seleccionado con éxito.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al seleccionar imagen: $e')),
+        );
+      }
+    }
   }
 
   void _removeFile() {
@@ -291,7 +308,7 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
                                         const SizedBox(height: 20),
                                         // Dotted Dropzone
                                         InkWell(
-                                          onTap: _simulateFileUpload,
+                                          onTap: _pickImageFromGallery,
                                           borderRadius: AppRadius.borderMd,
                                           child: CustomPaint(
                                             painter: DashedBorderPainter(
@@ -654,4 +671,6 @@ class DashedBorderPainter extends CustomPainter {
         oldDelegate.strokeWidth != strokeWidth ||
         oldDelegate.dashWidth != dashWidth ||
         oldDelegate.dashGap != dashGap ||
-       
+        oldDelegate.borderRadius != borderRadius;
+  }
+}
