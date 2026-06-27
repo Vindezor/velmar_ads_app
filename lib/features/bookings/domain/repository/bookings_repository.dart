@@ -21,4 +21,5 @@ abstract interface class BookingsRepository {
     required String assetId,
   });
   Future<Either<Failure, Map<String, dynamic>>> getCreativeAsset(String assetId);
+  Future<Either<Failure, List<Booking>>> getUserBookings(String userId);
 }

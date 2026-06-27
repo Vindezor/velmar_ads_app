@@ -35,3 +35,5 @@ final class BookingsSubmitCheckout extends BookingsEvent {
     required this.assetId,
   });
 }
+
+final class BookingsLoadUserBookings extends BookingsEvent {}

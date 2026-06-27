@@ -5,6 +5,9 @@ class Booking {
   final DateTime startTime;
   final DateTime endTime;
   final String status;
+  final double totalCredits;
+  final String? billboardName;
+  final String? billboardImageUrl;
 
   Booking({
     required this.id,
@@ -13,5 +16,8 @@ class Booking {
     required this.startTime,
     required this.endTime,
     required this.status,
+    required this.totalCredits,
+    this.billboardName,
+    this.billboardImageUrl,
   });
 }

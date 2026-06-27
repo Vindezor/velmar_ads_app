@@ -23,6 +23,7 @@ import 'package:velmar_ads/features/bookings/domain/usecases/create_booking_usec
 import 'package:velmar_ads/features/bookings/domain/usecases/get_active_booking_type_id.dart';
 import 'package:velmar_ads/features/bookings/domain/usecases/get_user_credits.dart';
 import 'package:velmar_ads/features/bookings/domain/usecases/get_creative_asset.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/get_user_bookings.dart';
 import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:velmar_ads/features/library/data/datasources/library_remote_data_source.dart';
 import 'package:velmar_ads/features/library/data/repositories/library_repository_impl.dart';
@@ -100,6 +101,7 @@ void _initBookings() {
     ..registerFactory(() => CalculateBookingPrice(bookingsRepository: serviceLocator()))
     ..registerFactory(() => CreateBookingUseCase(bookingsRepository: serviceLocator()))
     ..registerFactory(() => GetCreativeAsset(bookingsRepository: serviceLocator()))
+    ..registerFactory(() => GetUserBookings(bookingsRepository: serviceLocator()))
     ..registerFactory(
       () => BookingsBloc(
         getBillboardBookings: serviceLocator(),
@@ -108,6 +110,8 @@ void _initBookings() {
         calculateBookingPrice: serviceLocator(),
         createBookingUseCase: serviceLocator(),
         getCreativeAsset: serviceLocator(),
+        getUserBookings: serviceLocator(),
+        appUserCubit: serviceLocator(),
       ),
     );
 }

@@ -22,4 +22,14 @@ class DateFormatter {
     final minute = dateTime.minute.toString().padLeft(2, '0');
     return '$day $month, $hour:$minute';
   }
+
+  /// Formats a DateTime range into Spanish format (e.g. "15 Nov - 30 Nov, 2023")
+  static String formatRange(DateTime start, DateTime end) {
+    final startDay = start.day.toString();
+    final startMonth = _spanishMonths[start.month - 1];
+    final endDay = end.day.toString();
+    final endMonth = _spanishMonths[end.month - 1];
+    final year = start.year.toString();
+    return '$startDay $startMonth - $endDay $endMonth, $year';
+  }
 }

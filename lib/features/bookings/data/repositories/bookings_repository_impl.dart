@@ -96,4 +96,14 @@ class BookingsRepositoryImpl implements BookingsRepository {
       return left(Failure(e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, List<Booking>>> getUserBookings(String userId) async {
+    try {
+      final bookings = await _remoteDataSource.getUserBookings(userId);
+      return right(bookings);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
 }
