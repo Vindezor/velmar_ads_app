@@ -23,12 +23,38 @@ abstract interface class BookingsRemoteDataSource {
   Future<Map<String, dynamic>> getCreativeAsset(String assetId);
   Future<List<BookingModel>> getUserBookings(String userId);
   Future<BookingModel> getBookingDetail(String bookingId);
+  Future<void> resubmitBooking({required String bookingId, required String assetId, String? notes});
 }
 
 class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   final SupabaseClient supabaseClient;
 
   const BookingsRemoteDataSourceImpl({required this.supabaseClient});
+
+  @override
+  Future<void> resubmitBooking({required String bookingId, required String assetId, String? notes}) async {
+    try {
+      final currentResponse = await supabaseClient
+          .from('bookings')
+          .select('resubmission_count')
+          .eq('id', bookingId)
+          .single();
+      final resubmissionCount = (currentResponse['resubmission_count'] as num?)?.toInt() ?? 0;
+
+      await supabaseClient
+          .from('bookings')
+          .update({
+            'asset_id': assetId,
+            'status': 'resubmitted',
+            'resubmission_count': resubmissionCount + 1,
+            'notes': notes,
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('id', bookingId);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
 
   @override
   Future<BookingModel> getBookingDetail(String bookingId) async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:velmar_ads/core/router/app_routes.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/features/bookings/domain/entities/booking.dart';
 
@@ -23,10 +24,9 @@ class BookingDetailActions extends StatelessWidget {
         if (isRejected) ...[
           ElevatedButton(
             onPressed: () {
-              // Navigates to upload asset or similar to edit creativity
-              // For now, we can show a SnackBar or navigate
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Editar Creatividad presionado.')),
+              context.push(
+                AppRoutes.bookingCorrectPath(booking.id),
+                extra: booking,
               );
             },
             style: ElevatedButton.styleFrom(

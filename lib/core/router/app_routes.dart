@@ -10,10 +10,12 @@ class AppRoutes {
   static const uploadAsset = '/dashboard/billboard/:id/book/upload-asset';
   static const bookingConfirmation = '/booking-confirmation/:id';
   static const bookingDetail = '/bookings/:id';
+  static const bookingCorrect = '/bookings/:id/correct';
 
   static String billboardDetailPath(String id) => '/dashboard/billboard/$id';
   static String selectSchedulePath(String id) => '/dashboard/billboard/$id/book';
   static String uploadAssetPath(String id) => '/dashboard/billboard/$id/book/upload-asset';
   static String bookingConfirmationPath(String id) => '/booking-confirmation/$id';
   static String bookingDetailPath(String id) => '/bookings/$id';
+  static String bookingCorrectPath(String id) => '/bookings/$id/correct';
 }

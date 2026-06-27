@@ -110,3 +110,13 @@ final class BookingsBookingDetailError extends BookingsState {
   final String message;
   BookingsBookingDetailError({required this.message});
 }
+
+// Booking Correction States
+final class BookingsCorrectionSubmitting extends BookingsState {}
+
+final class BookingsCorrectionSuccess extends BookingsState {}
+
+final class BookingsCorrectionFailure extends BookingsState {
+  final String error;
+  BookingsCorrectionFailure({required this.error});
+}

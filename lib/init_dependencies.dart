@@ -25,6 +25,7 @@ import 'package:velmar_ads/features/bookings/domain/usecases/get_user_credits.da
 import 'package:velmar_ads/features/bookings/domain/usecases/get_creative_asset.dart';
 import 'package:velmar_ads/features/bookings/domain/usecases/get_user_bookings.dart';
 import 'package:velmar_ads/features/bookings/domain/usecases/get_booking_detail.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/resubmit_booking.dart';
 import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:velmar_ads/features/library/data/datasources/library_remote_data_source.dart';
 import 'package:velmar_ads/features/library/data/repositories/library_repository_impl.dart';
@@ -104,6 +105,7 @@ void _initBookings() {
     ..registerFactory(() => GetCreativeAsset(bookingsRepository: serviceLocator()))
     ..registerFactory(() => GetUserBookings(bookingsRepository: serviceLocator()))
     ..registerFactory(() => GetBookingDetail(bookingsRepository: serviceLocator()))
+    ..registerFactory(() => ResubmitBooking(bookingsRepository: serviceLocator()))
     ..registerFactory(
       () => BookingsBloc(
         getBillboardBookings: serviceLocator(),
@@ -114,6 +116,7 @@ void _initBookings() {
         getCreativeAsset: serviceLocator(),
         getUserBookings: serviceLocator(),
         getBookingDetail: serviceLocator(),
+        resubmitBooking: serviceLocator(),
         appUserCubit: serviceLocator(),
       ),
     );
