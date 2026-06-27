@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -71,7 +73,7 @@ class _AssetUploadPageState extends State<AssetUploadPage>
     super.dispose();
   }
 
-  void _startUpload() {
+  Future<void> _startUpload() async {
     final userState = context.read<AppUserCubit>().state;
     if (userState is! AppUserLoggedIn) {
       showSnackBar(context: context, message: 'Usuario no autenticado.');
@@ -87,26 +89,35 @@ class _AssetUploadPageState extends State<AssetUploadPage>
 
     _uploadController.forward(from: 0.0);
 
-    // Array de bytes de un PNG transparente real de 1x1 píxeles
-    final List<int> mockPngBytes = [
-      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
-      0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-      0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
-      0x0D, 0x49, 0x44, 0x41, 0x54, 0x78, 0xDA, 0x63, 0x60, 0x18, 0x05, 0xA3,
-      0x60, 0x14, 0x8C, 0x00, 0x08, 0x00, 0x45, 0x06, 0x7B, 0x94, 0x11, 0x00,
-      0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
-    ];
+    try {
+      const url = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDY0w3KW2MBy0AEYCjjQn92MQVdy-tETVgM-QMKfdGbpJLYz2QSCfnO4jx71zptYuQlyj-hWmg2Y92DP4LDVH_capKE6qMu0iodkV4WogjUeb02ryVaVIHjQjQ_VCgrvM972XpgbjHYOcmXTxPQfG6IMAM2ma36oZJuOSp3b0MgnKZxgfy0faZpfKKMy0kRuthlfFnNsZ45dQwzlXX-FPaW0mlLEIFLV6DBBXT8AwlOckA78ltbhH4fY7vazPr-GBcAtbY64FrDNJk';
+      final client = HttpClient();
+      final request = await client.getUrl(Uri.parse(url));
+      final response = await request.close();
 
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final fileName = 'campaign_summer_2024_$timestamp.png';
+      final bytesBuilder = BytesBuilder();
+      await for (final chunk in response) {
+        bytesBuilder.add(chunk);
+      }
+      final fileBytes = bytesBuilder.takeBytes();
 
-    context.read<LibraryBloc>().add(
-          LibraryUploadAsset(
-            fileBytes: mockPngBytes,
-            fileName: fileName,
-            userId: userId,
-          ),
-        );
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = 'campaign_summer_2024_$timestamp.png';
+
+      if (!mounted) return;
+
+      context.read<LibraryBloc>().add(
+            LibraryUploadAsset(
+              fileBytes: fileBytes,
+              fileName: fileName,
+              userId: userId,
+            ),
+          );
+    } catch (e) {
+      if (!mounted) return;
+      showSnackBar(context: context, message: 'Error al procesar la imagen de prueba: $e');
+      _cancelUpload();
+    }
   }
 
   void _cancelUpload() {

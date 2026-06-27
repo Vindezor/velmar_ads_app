@@ -32,7 +32,18 @@ class BookingErrorView extends StatelessWidget {
     // Helper to format credits nicely
     String formatCredits(double value) {
       final parts = value.toStringAsFixed(0);
-      return '$parts CR';
+      final buffer = StringBuffer();
+      int count = 0;
+      for (int i = parts.length - 1; i >= 0; i--) {
+        buffer.write(parts[i]);
+        count++;
+        if (count == 3 && i > 0) {
+          buffer.write(',');
+          count = 0;
+        }
+      }
+      final reversed = buffer.toString().split('').reversed.join('');
+      return '\$$reversed';
     }
 
     return Center(
