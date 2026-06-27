@@ -55,17 +55,24 @@ class ProfileView extends StatelessWidget {
             ProfileCreditRequestsError() => const Center(
                 child: CircularProgressIndicator(color: AppPallete.primary),
               ),
-            ProfileLoaded(profileDetails: final details) => LayoutBuilder(
-                builder: (context, constraints) {
-                  final isWide = constraints.maxWidth >= 768;
+            ProfileLoaded(
+              profileDetails: final details,
+              isRefreshing: final isRefreshing,
+            ) =>
+                LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 768;
 
-                  final leftSide = Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ProfileHeader(user: currentUser),
-                      const SizedBox(height: AppSpacing.stackLg),
-                      ProfileBalanceCard(credits: details.credits),
+                final leftSide = Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ProfileHeader(user: currentUser),
+                    const SizedBox(height: AppSpacing.stackLg),
+                    ProfileBalanceCard(
+                      credits: details.credits,
+                      isRefreshing: isRefreshing,
+                    ),
                       const SizedBox(height: AppSpacing.stackLg),
                       if (!isWide) ...[
                         ProfileMovementList(

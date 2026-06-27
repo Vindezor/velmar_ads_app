@@ -39,7 +39,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileLoadDetails event,
     Emitter<ProfileState> emit,
   ) async {
-    emit(ProfileLoading());
+    final currentState = state;
+    if (currentState is ProfileLoaded) {
+      emit(ProfileLoaded(
+        profileDetails: currentState.profileDetails,
+        isRefreshing: true,
+      ));
+    } else {
+      emit(ProfileLoading());
+    }
 
     final userState = _appUserCubit.state;
     if (userState is! AppUserLoggedIn) {
@@ -50,7 +58,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     final result = await _getProfileDetails(userState.user.id);
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
-      (details) => emit(ProfileLoaded(profileDetails: details)),
+      (details) => emit(ProfileLoaded(profileDetails: details, isRefreshing: false)),
     );
   }
 

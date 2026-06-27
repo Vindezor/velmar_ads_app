@@ -9,7 +9,11 @@ final class ProfileLoading extends ProfileState {}
 
 final class ProfileLoaded extends ProfileState {
   final ProfileDetails profileDetails;
-  ProfileLoaded({required this.profileDetails});
+  final bool isRefreshing;
+  ProfileLoaded({
+    required this.profileDetails,
+    this.isRefreshing = false,
+  });
 }
 
 final class ProfileError extends ProfileState {

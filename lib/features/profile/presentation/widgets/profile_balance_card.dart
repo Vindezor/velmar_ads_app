@@ -8,10 +8,12 @@ import 'package:velmar_ads/features/profile/presentation/bloc/profile_bloc.dart'
 
 class ProfileBalanceCard extends StatelessWidget {
   final double credits;
+  final bool isRefreshing;
 
   const ProfileBalanceCard({
     super.key,
     required this.credits,
+    this.isRefreshing = false,
   });
 
   @override
@@ -62,19 +64,28 @@ class ProfileBalanceCard extends StatelessWidget {
                       fontSize: 11,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      context.read<ProfileBloc>().add(ProfileLoadDetails());
-                    },
-                    icon: const Icon(
-                      Icons.refresh,
-                      size: 22,
-                      color: AppPallete.primary,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    tooltip: 'Actualizar saldo',
-                  ),
+                  isRefreshing
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppPallete.primary,
+                          ),
+                        )
+                      : IconButton(
+                          onPressed: () {
+                            context.read<ProfileBloc>().add(ProfileLoadDetails());
+                          },
+                          icon: const Icon(
+                            Icons.refresh,
+                            size: 22,
+                            color: AppPallete.primary,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          tooltip: 'Actualizar saldo',
+                        ),
                 ],
               ),
               const SizedBox(height: AppSpacing.stackSm),
