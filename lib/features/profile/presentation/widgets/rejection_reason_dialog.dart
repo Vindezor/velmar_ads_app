@@ -31,12 +31,12 @@ class RejectionReasonDialog extends StatelessWidget {
           children: [
             // Header
             Container(
-              color: AppPallete.surface,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.containerPadding,
                 vertical: AppSpacing.gutter,
               ),
               decoration: const BoxDecoration(
+                color: AppPallete.surface,
                 border: Border(
                   bottom: BorderSide(color: AppPallete.outlineVariant),
                 ),
@@ -114,12 +114,12 @@ class RejectionReasonDialog extends StatelessWidget {
             ),
             // Footer
             Container(
-              color: AppPallete.surface,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.containerPadding,
                 vertical: AppSpacing.gutter,
               ),
               decoration: const BoxDecoration(
+                color: AppPallete.surface,
                 border: Border(
                   top: BorderSide(color: AppPallete.outlineVariant),
                 ),
@@ -132,6 +132,7 @@ class RejectionReasonDialog extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppPallete.primary,
                       side: const BorderSide(color: AppPallete.primaryContainer),
+                      minimumSize: const Size(0, 48),
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.containerPadding,
                         vertical: AppSpacing.gutter,
@@ -161,6 +162,7 @@ class RejectionReasonDialog extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppPallete.primaryContainer,
                       foregroundColor: AppPallete.onPrimary,
+                      minimumSize: const Size(0, 48),
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.containerPadding,
                         vertical: AppSpacing.gutter,
