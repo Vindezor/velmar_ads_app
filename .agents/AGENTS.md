@@ -63,6 +63,12 @@ Este proyecto utiliza **Clean Architecture** (Arquitectura Limpia) con **Flutter
 
 ---
 
+## 💬 Estilo de Comunicación y Entregas
+
+*   **Resumen de Cambios Estilo Git**: Al finalizar una tarea o refactorización que involucre cambios en el código, el agente debe incluir al final de su respuesta un bloque breve y conciso (en una sola línea) formateado con el estilo Git (ej: `Add: ... Fix: ... Modify: ...`), ideal para ser utilizado directamente como mensaje de commit.
+
+---
+
 ## 🗄️ Esquema de Base de Datos de Supabase
 
 Ten en cuenta este esquema al crear modelos de datos, entidades y data sources:
