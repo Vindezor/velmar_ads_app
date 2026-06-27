@@ -32,6 +32,11 @@ import 'package:velmar_ads/features/library/data/repositories/library_repository
 import 'package:velmar_ads/features/library/domain/repository/library_repository.dart';
 import 'package:velmar_ads/features/library/domain/usecases/upload_ad_asset.dart';
 import 'package:velmar_ads/features/library/presentation/bloc/library_bloc.dart';
+import 'package:velmar_ads/features/profile/data/datasources/profile_remote_data_source.dart';
+import 'package:velmar_ads/features/profile/data/repositories/profile_repository_impl.dart';
+import 'package:velmar_ads/features/profile/domain/repository/profile_repository.dart';
+import 'package:velmar_ads/features/profile/domain/usecases/get_profile_details.dart';
+import 'package:velmar_ads/features/profile/presentation/bloc/profile_bloc.dart';
 
 
 final serviceLocator = GetIt.instance;
@@ -41,6 +46,7 @@ Future<void> initDependencies() async {
   _initDashboard();
   _initBookings();
   _initLibrary();
+  _initProfile();
   final supabase = await Supabase.initialize(
     url: AppSecrets.supabaseUrl,
     publishableKey: AppSecrets.supabasePublishableKey,
@@ -132,6 +138,23 @@ void _initLibrary() {
     )
     ..registerFactory(() => UploadAdAsset(repository: serviceLocator()))
     ..registerFactory(() => LibraryBloc(uploadAdAsset: serviceLocator()));
+}
+
+void _initProfile() {
+  serviceLocator
+    ..registerFactory<ProfileRemoteDataSource>(
+      () => ProfileRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+    )
+    ..registerFactory<ProfileRepository>(
+      () => ProfileRepositoryImpl(remoteDataSource: serviceLocator()),
+    )
+    ..registerFactory(() => GetProfileDetails(profileRepository: serviceLocator()))
+    ..registerFactory(
+      () => ProfileBloc(
+        getProfileDetails: serviceLocator(),
+        appUserCubit: serviceLocator(),
+      ),
+    );
 }
 
 
