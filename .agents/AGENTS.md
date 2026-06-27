@@ -19,6 +19,8 @@ Este proyecto utiliza **Clean Architecture** (Arquitectura Limpia) con **Flutter
     *   Al crear una nueva característica, siempre divídela en `domain`, `data` y `presentation` con sus respectivas subcarpetas.
     *   No mezcles lógica de datos (ej. cliente de Supabase, serialización JSON) en la capa de UI o dominio.
     *   **Prohibición de Importaciones Cruzadas en Capa de Datos**: Queda estrictamente prohibido que una característica importación directa de componentes de la capa de datos (`Models`, `DataSources`, `RepositoriesImpl`) de otra característica. Para compartir información de usuario, usa las entidades y cubits globales provistos en `core` (ej: `User` y `AppUserCubit` en `lib/core/common/`).
+    *   **No Modificar Características Existentes por Requerimientos de Nuevas Características**: Queda terminantemente prohibido modificar modelos, data sources, entidades o repositorios de una característica ya implementada (como `auth`) solo para satisfacer las necesidades de datos de una característica nueva (como `dashboard`). Cada característica debe ser completamente autónoma y resolver sus consultas en su propio DataSource utilizando los identificadores compartidos de `core` (como el ID del usuario provisto por la sesión). No se debe acoplar o contaminar la lógica de otras características.
+
 
 
 2.  **Manejo de Errores y Tipos Retornados**:
@@ -34,6 +36,9 @@ Este proyecto utiliza **Clean Architecture** (Arquitectura Limpia) con **Flutter
 4.  **Gestión de Estados**:
     *   Usa `flutter_bloc`. Los Blocs se colocan en `presentation/bloc/` de su respectiva feature.
     *   Para estados compartidos globalmente (como autenticación e información básica del usuario activo), utiliza el cubit global `AppUserCubit` ubicado en `lib/core/common/cubits/app_user/`.
+    *   **Encapsulamiento de Dependencias en Blocs**: Las dependencias inyectadas en los constructores de los Blocs/Cubits deben definirse como variables finales privadas (ej: `final GetDashboardData _getDashboardData;`) e inicializarse mediante la lista de inicialización del constructor (ej: `: _getDashboardData = getDashboardData`). Se debe usar el comentario `// ignore_for_file: prefer_initializing_formals` al inicio del archivo para silenciar la advertencia del analizador de Dart.
+    *   **Un solo BLoC por Característica (Estandarización)**: Queda establecido que para mantener la uniformidad arquitectónica del proyecto, cada característica (feature) debe tener un único BLoC principal nombrado de forma idéntica a la característica (ej. `AuthBloc`, `DashboardBloc`, `BookingsBloc`, `LibraryBloc`). Los archivos correspondientes deben nombrarse como `feature_bloc.dart`, `feature_event.dart` y `feature_state.dart` dentro del directorio `presentation/bloc/`. Se prohíbe la creación de Cubits individuales o de múltiples sub-blocs dispersos que fraccionen el estado de la misma característica.
+
 
 5.  **Enrutamiento (`go_router`)**:
     *   Registra las páginas en [app_router.dart](file:///d:/AMD/Escritorio/Velmar_Ads/Code/Flutter/velmar_ads/lib/core/router/app_router.dart).
@@ -47,7 +52,14 @@ Este proyecto utiliza **Clean Architecture** (Arquitectura Limpia) con **Flutter
         *   Bordes y Radios: Usa los valores definidos en `AppRadius` (ej. `AppRadius.md`).
         *   Espaciados: Usa los espaciados estandarizados en `AppSpacing`.
     *   Queda prohibido hardcodear colores o dimensiones arbitrarias sin justificación.
-
+    *   **Descomposición de Widgets (SRP y Mantenibilidad)**: Queda estrictamente prohibido construir o acumular lógica de sub-widgets mediante métodos o funciones auxiliares privadas (ej. `_buildAppBar()`, `_buildLoadedView()`, `_buildSubHeader()`) dentro de la clase principal de la página. Toda estructura de componentes de UI, incluso las más básicas como el AppBar o las vistas cargadas/errores, debe extraerse obligatoriamente a archivos separados dentro de la carpeta `widgets/` de la característica y estructurarse como clases independientes (`StatelessWidget` o `StatefulWidget`) para optimizar el ciclo de vida y reconstrucción de widgets de Flutter.
+    *   **Extracción de Utilidades de Formato (SRP)**: Ninguna lógica de formato compleja (como formatear dinero, fechas o números) debe estar acoplada a las clases de la UI. Estas deben extraerse a clases de utilidad pura bajo `lib/core/utils/` (ej: `CurrencyFormatter`).
+    *   **Manejo de Estados con Switch de Dart 3 (OCP)**: Al consumir estados de Blocs sellados (`sealed class`), utiliza expresiones `switch` de Dart 3 en lugar de cadenas de `if/else if`. Esto provee comprobación de exhaustividad en tiempo de compilación y garantiza que se cumpla el principio Abierto/Cerrado ante nuevos estados.
+    *   **Integridad de Datos (No Inventar Datos)**: Queda estrictamente prohibido hardcodear o inventar valores de prueba/placeholders para especificaciones técnicas o de negocio que no provengan de la base de datos o la API. Si un campo no existe en las tablas de Supabase, debe eliminarse de la vista. Si el valor es opcional o nulo, debe mostrarse como 'N/A' o remover la fila correspondiente para garantizar la consistencia con el backend.
+7.  **Principios SOLID y Coordinación de Estados (Cubit/Bloc)**:
+    *   Sigue estrictamente los principios SOLID. Evita acoplar la UI con la lógica de sesión o negocio.
+    *   Si un Bloc o Cubit de una funcionalidad específica (ej. `DashboardBloc`) necesita consultar la sesión o la información del usuario logueado, inyecta `AppUserCubit` en su constructor.
+    *   Los eventos de carga de la UI no deben arrastrar parámetros que ya están disponibles en los estados globales (como el `userId`), delegando esa obtención de forma interna al Bloc mediante el Cubit inyectado.
 
 ---
 

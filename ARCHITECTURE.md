@@ -70,6 +70,10 @@ Toda la configuración de inyección de dependencias está centralizada en [init
 ### 2. Manejo de Estados (`flutter_bloc`)
 *   Para estados globales de sesión y datos persistentes a nivel de app, usamos **Cubits** (como `AppUserCubit` en `lib/core/common/cubits/app_user/`).
 *   Para lógica específica de formularios y pantallas complejas, usamos **Blocs** estructurados con eventos (`Event`) y estados (`State`).
+*   **Coordinación entre Blocs e Inyección Cruzada**: Si un Bloc de funcionalidad local necesita consultar información del usuario logueado (como el `userId`), se le debe inyectar el `AppUserCubit` en su constructor. La UI no debe responsabilizarse de extraer y pasar identificadores que ya están globalmente disponibles, delegando esa lógica al Bloc y cumpliendo con los principios SOLID de encapsulamiento y responsabilidad única.
+*   **Encapsulamiento de Dependencias**: Por convención, las dependencias inyectadas en los Blocs deben almacenarse como variables privadas finales (ej. `final GetDashboardData _getDashboardData;`) y asignarse en la lista de inicializadores del constructor. Para evitar advertencias del compilador de Dart, se coloca el ignore de archivo `// ignore_for_file: prefer_initializing_formals`.
+
+
 
 ### 3. Enrutamiento (`go_router`)
 La navegación está declarada en [app_router.dart](file:///d:/AMD/Escritorio/Velmar_Ads/Code/Flutter/velmar_ads/lib/core/router/app_router.dart).
@@ -90,6 +94,9 @@ El desarrollo visual de las interfaces en **Velmar Ads** sigue un flujo estructu
     *   **Bordes y Radios**: Utilizar los radios predefinidos en `AppRadius` (ej. `AppRadius.md` para campos de entrada y botones, `AppRadius.lg` para tarjetas).
     *   **Espaciados**: Utilizar las dimensiones de `AppSpacing` para mantener la consistencia vertical y horizontal.
 *   **Componentes Material Design**: Utilizar y extender de forma limpia los componentes proporcionados por Flutter Material (ej. `Card`, `ElevatedButton`, `OutlinedButton`, `TextFormField`, etc.) que ya están pre-estilizados en el tema central.
+*   **Descomposición de Widgets Grandes (SRP)**: Los métodos `build` de las páginas de UI no deben volverse gigantescos. Debes estructurar la UI dividiendo los estados o secciones en métodos privados auxiliares (ej. `_buildAppBar()`, `_buildLoadedView(data)`) o extraerlos a widgets separados.
+*   **Extracción de Utilidades de Formato (SRP)**: Ninguna lógica de formato compleja (como formatear dinero, fechas o números) debe estar acoplada a las clases de la UI. Estas deben extraerse a clases de utilidad pura bajo `lib/core/utils/` (ej: `CurrencyFormatter`).
+*   **Manejo de Estados con Switch de Dart 3 (OCP)**: Al consumir estados de Blocs sellados (`sealed class`), utiliza expresiones `switch` de Dart 3 en lugar de cadenas de `if/else if`. Esto provee comprobación de exhaustividad en tiempo de compilación y garantiza que se cumpla el principio Abierto/Cerrado ante nuevos estados.
 
 ---
 
@@ -97,7 +104,9 @@ El desarrollo visual de las interfaces en **Velmar Ads** sigue un flujo estructu
 ## 💡 Reglas para Crear Nuevos Módulos o Características
 
 > [!WARNING]
-> **Prohibición de Importaciones Cruzadas (Acoplamiento de Features)**: Queda estrictamente prohibido importar clases de la capa de datos (`Models`, `DataSources`, `RepositoriesImpl`) de una característica en otra. El acoplamiento entre características debe ocurrir únicamente a través de la capa `core/common/` mediante entidades y cubits globales compartidos (por ejemplo, utilizando `User` y `AppUserCubit` para consultar créditos o sesión del usuario).
+> * **Prohibición de Importaciones Cruzadas (Acoplamiento de Features)**: Queda estrictamente prohibido importar clases de la capa de datos (`Models`, `DataSources`, `RepositoriesImpl`) de una característica en otra. El acoplamiento entre características debe ocurrir únicamente a través de la capa `core/common/` mediante entidades y cubits globales compartidos (por ejemplo, utilizando `User` y `AppUserCubit` para consultar la sesión del usuario).
+> * **Autonomía de Características Existentes**: Queda estrictamente prohibido modificar modelos, data sources, entidades o repositorios de características ya establecidas (como `auth`) con el único fin de alimentar o satisfacer los requerimientos de datos de una nueva característica (como `dashboard`). Cada característica debe resolver sus consultas y persistencia de forma independiente mediante su propio `DataSource`, consumiendo de `core` únicamente identificadores compartidos de sesión (como el ID del usuario).
+
 
 Cuando se te solicite agregar una nueva funcionalidad (ej. `campaigns`, `analytics`), debes seguir este orden y estructura:
 

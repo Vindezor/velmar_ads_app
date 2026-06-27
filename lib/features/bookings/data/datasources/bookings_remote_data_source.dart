@@ -1,0 +1,143 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:velmar_ads/core/error/exceptions.dart';
+import 'package:velmar_ads/features/bookings/data/models/booking_model.dart';
+
+abstract interface class BookingsRemoteDataSource {
+  Future<List<BookingModel>> getBillboardBookings(String billboardId);
+  Future<double> getUserCredits(String userId);
+  Future<String> getActiveBookingTypeId();
+  Future<Map<String, dynamic>> calculateBookingPrice({
+    required String billboardId,
+    required String bookingTypeId,
+    required DateTime startTime,
+    required DateTime endTime,
+  });
+  Future<Map<String, dynamic>> createBooking({
+    required String userId,
+    required String billboardId,
+    required String bookingTypeId,
+    required DateTime startTime,
+    required DateTime endTime,
+    required String assetId,
+  });
+  Future<Map<String, dynamic>> getCreativeAsset(String assetId);
+}
+
+class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
+  final SupabaseClient supabaseClient;
+
+  const BookingsRemoteDataSourceImpl({required this.supabaseClient});
+
+  @override
+  Future<Map<String, dynamic>> getCreativeAsset(String assetId) async {
+    try {
+      final response = await supabaseClient
+          .from('creative_assets')
+          .select('*')
+          .eq('id', assetId)
+          .single();
+      return response;
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<BookingModel>> getBillboardBookings(String billboardId) async {
+    try {
+      final response = await supabaseClient
+          .from('bookings')
+          .select('*')
+          .eq('billboard_id', billboardId)
+          .inFilter('status', ['approved', 'pending', 'resubmitted']);
+
+      final list = response as List<dynamic>;
+      return list.map((json) => BookingModel.fromJson(json)).toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<double> getUserCredits(String userId) async {
+    try {
+      final response = await supabaseClient
+          .from('profiles')
+          .select('credits')
+          .eq('id', userId)
+          .single();
+      return (response['credits'] as num?)?.toDouble() ?? 0.0;
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> getActiveBookingTypeId() async {
+    try {
+      final response = await supabaseClient
+          .from('booking_types')
+          .select('id')
+          .eq('is_active', true)
+          .limit(1)
+          .maybeSingle();
+
+      if (response == null) {
+        throw const ServerException('No hay tipos de reserva configurados en el sistema.');
+      }
+      return response['id'] as String;
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> calculateBookingPrice({
+    required String billboardId,
+    required String bookingTypeId,
+    required DateTime startTime,
+    required DateTime endTime,
+  }) async {
+    try {
+      final response = await supabaseClient.rpc(
+        'calculate_booking_price',
+        params: {
+          'p_billboard_id': billboardId,
+          'p_booking_type_id': bookingTypeId,
+          'p_start_time': startTime.toIso8601String(),
+          'p_end_time': endTime.toIso8601String(),
+        },
+      );
+      return Map<String, dynamic>.from(response as Map);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> createBooking({
+    required String userId,
+    required String billboardId,
+    required String bookingTypeId,
+    required DateTime startTime,
+    required DateTime endTime,
+    required String assetId,
+  }) async {
+    try {
+      final response = await supabaseClient.rpc(
+        'create_booking',
+        params: {
+          'p_user_id': userId,
+          'p_billboard_id': billboardId,
+          'p_booking_type_id': bookingTypeId,
+          'p_start_time': startTime.toIso8601String(),
+          'p_end_time': endTime.toIso8601String(),
+          'p_asset_id': assetId,
+        },
+      );
+      return Map<String, dynamic>.from(response as Map);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+}
