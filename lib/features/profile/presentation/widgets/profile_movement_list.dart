@@ -37,7 +37,6 @@ class ProfileMovementList extends StatelessWidget {
       );
     }
 
-    final hasMore = movements.length > 5;
     final displayedMovements = movements.take(5).toList();
 
     return Column(
@@ -77,34 +76,33 @@ class ProfileMovementList extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return ProfileMovementItem(
                     movement: displayedMovements[index],
-                    showDivider: hasMore || (index < displayedMovements.length - 1),
+                    showDivider: true,
                   );
                 },
               ),
-              if (hasMore)
-                InkWell(
-                  onTap: () {
-                    context.push(
-                      AppRoutes.creditHistoryPath(),
-                      extra: {
-                        'credits': credits,
-                        'movements': movements,
-                      },
-                    );
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Ver todos los movimientos',
-                      style: AppTypography.labelMd.copyWith(
-                        color: AppPallete.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+              InkWell(
+                onTap: () {
+                  context.push(
+                    AppRoutes.creditHistoryPath(),
+                    extra: {
+                      'credits': credits,
+                      'movements': movements,
+                    },
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Ver todos los movimientos',
+                    style: AppTypography.labelMd.copyWith(
+                      color: AppPallete.primary,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+              ),
             ],
           ),
         ),

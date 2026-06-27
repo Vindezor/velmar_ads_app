@@ -68,8 +68,8 @@ class ProfileBalanceCard extends StatelessWidget {
                     },
                     icon: const Icon(
                       Icons.refresh,
-                      size: 16,
-                      color: AppPallete.secondary,
+                      size: 22,
+                      color: AppPallete.primary,
                     ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
