@@ -66,25 +66,32 @@ class ProfileBalanceCard extends StatelessWidget {
                   ),
                   isRefreshing
                       ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppPallete.primary,
+                          width: 30,
+                          height: 30,
+                          child: Center(
+                            child: SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppPallete.primary,
+                              ),
+                            ),
                           ),
                         )
-                      : IconButton(
-                          onPressed: () {
+                      : InkWell(
+                          onTap: () {
                             context.read<ProfileBloc>().add(ProfileLoadDetails());
                           },
-                          icon: const Icon(
-                            Icons.refresh,
-                            size: 22,
-                            color: AppPallete.primary,
+                          borderRadius: BorderRadius.circular(15),
+                          child: const Padding(
+                            padding: EdgeInsets.all(4),
+                            child: Icon(
+                              Icons.refresh,
+                              size: 22,
+                              color: AppPallete.primary,
+                            ),
                           ),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          tooltip: 'Actualizar saldo',
                         ),
                 ],
               ),
