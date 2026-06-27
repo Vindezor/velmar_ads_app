@@ -15,4 +15,16 @@ final class LibraryUploadAsset extends LibraryEvent {
   });
 }
 
+final class LibraryDeleteAsset extends LibraryEvent {
+  final String assetId;
+  final String fileName;
+  final String userId;
+
+  LibraryDeleteAsset({
+    required this.assetId,
+    required this.fileName,
+    required this.userId,
+  });
+}
+
 final class LibraryReset extends LibraryEvent {}

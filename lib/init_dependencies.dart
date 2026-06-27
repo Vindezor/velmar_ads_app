@@ -31,6 +31,7 @@ import 'package:velmar_ads/features/library/data/datasources/library_remote_data
 import 'package:velmar_ads/features/library/data/repositories/library_repository_impl.dart';
 import 'package:velmar_ads/features/library/domain/repository/library_repository.dart';
 import 'package:velmar_ads/features/library/domain/usecases/upload_ad_asset.dart';
+import 'package:velmar_ads/features/library/domain/usecases/delete_ad_asset.dart';
 import 'package:velmar_ads/features/library/presentation/bloc/library_bloc.dart';
 import 'package:velmar_ads/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:velmar_ads/features/profile/data/repositories/profile_repository_impl.dart';
@@ -139,7 +140,13 @@ void _initLibrary() {
       () => LibraryRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => UploadAdAsset(repository: serviceLocator()))
-    ..registerFactory(() => LibraryBloc(uploadAdAsset: serviceLocator()));
+    ..registerFactory(() => DeleteAdAsset(repository: serviceLocator()))
+    ..registerFactory(
+      () => LibraryBloc(
+        uploadAdAsset: serviceLocator(),
+        deleteAdAsset: serviceLocator(),
+      ),
+    );
 }
 
 void _initProfile() {
