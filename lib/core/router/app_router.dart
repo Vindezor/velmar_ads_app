@@ -8,12 +8,15 @@ import 'package:velmar_ads/features/auth/presentation/pages/login_page.dart';
 import 'package:velmar_ads/features/auth/presentation/pages/signup_page.dart';
 import 'package:velmar_ads/features/bookings/presentation/pages/bookings_page.dart';
 import 'package:velmar_ads/features/bookings/presentation/pages/schedule_selection_page.dart';
+import 'package:velmar_ads/features/bookings/presentation/pages/booking_confirmation_page.dart';
 import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
 import 'package:velmar_ads/features/dashboard/presentation/pages/billboard_detail_page.dart';
 import 'package:velmar_ads/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:velmar_ads/features/library/presentation/pages/library_page.dart';
+import 'package:velmar_ads/features/library/presentation/pages/asset_upload_page.dart';
+import 'package:velmar_ads/features/library/presentation/bloc/library_bloc.dart';
 import 'package:velmar_ads/features/profile/presentation/pages/profile_page.dart';
-import 'package:velmar_ads/features/bookings/presentation/cubit/booking_availability_cubit.dart';
+import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:velmar_ads/init_dependencies.dart';
 
 // Un pequeño puente (Helper) para convertir el Stream del Cubit en un Listenable que GoRouter entienda
@@ -75,6 +78,45 @@ final GoRouter appRouter = GoRouter(
       name: 'register',
       builder: (context, state) => const SignUpPage(),
     ),
+    GoRoute(
+      path: AppRoutes.bookingConfirmation,
+      name: 'booking-confirmation',
+      builder: (context, state) {
+        final extraMap = state.extra as Map<String, dynamic>?;
+        final billboard = extraMap?['billboard'] as Billboard?;
+        final selectedDate = extraMap?['selectedDate'] as DateTime?;
+        final selectedSlots = extraMap?['selectedSlots'] as List<int>?;
+        final assetId = extraMap?['assetId'] as String?;
+        return BlocProvider(
+          create: (context) {
+            final bloc = serviceLocator<BookingsBloc>();
+            final userState = context.read<AppUserCubit>().state;
+            if (userState is AppUserLoggedIn &&
+                billboard != null &&
+                selectedDate != null &&
+                selectedSlots != null &&
+                assetId != null) {
+              bloc.add(
+                BookingsLoadConfirmationData(
+                  userId: userState.user.id,
+                  billboardId: billboard.id,
+                  selectedDate: selectedDate,
+                  selectedSlots: selectedSlots,
+                  assetId: assetId,
+                ),
+              );
+            }
+            return bloc;
+          },
+          child: BookingConfirmationPage(
+            billboard: billboard,
+            selectedDate: selectedDate,
+            selectedSlots: selectedSlots,
+            assetId: assetId,
+          ),
+        );
+      },
+    ),
     
     // StatefulShellRoute mantiene la barra inferior compartida y el estado de cada pestaña
     StatefulShellRoute.indexedStack(
@@ -96,7 +138,7 @@ final GoRouter appRouter = GoRouter(
                     final billboard = state.extra as Billboard?;
                     final id = state.pathParameters['id'] ?? '';
                     return BlocProvider(
-                      create: (context) => serviceLocator<BookingAvailabilityCubit>()..fetchAvailability(id),
+                      create: (context) => serviceLocator<BookingsBloc>()..add(BookingsFetchAvailability(billboardId: id)),
                       child: BillboardDetailPage(billboard: billboard),
                     );
                   },
@@ -108,10 +150,30 @@ final GoRouter appRouter = GoRouter(
                         final billboard = state.extra as Billboard?;
                         final id = state.pathParameters['id'] ?? '';
                         return BlocProvider(
-                          create: (context) => serviceLocator<BookingAvailabilityCubit>()..fetchAvailability(id),
+                          create: (context) => serviceLocator<BookingsBloc>()..add(BookingsFetchAvailability(billboardId: id)),
                           child: ScheduleSelectionPage(billboard: billboard),
                         );
                       },
+                      routes: [
+                        GoRoute(
+                          path: 'upload-asset',
+                          name: 'upload-asset',
+                          builder: (context, state) {
+                            final extraMap = state.extra as Map<String, dynamic>?;
+                            final billboard = extraMap?['billboard'] as Billboard?;
+                            final selectedDate = extraMap?['selectedDate'] as DateTime?;
+                            final selectedSlots = extraMap?['selectedSlots'] as List<int>?;
+                            return BlocProvider(
+                              create: (context) => serviceLocator<LibraryBloc>(),
+                              child: AssetUploadPage(
+                                billboard: billboard,
+                                selectedDate: selectedDate,
+                                selectedSlots: selectedSlots,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
-import 'package:velmar_ads/core/utils/show_snackbar.dart';
 import 'package:velmar_ads/core/common/widgets/loader.dart';
 import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_app_bar.dart';
@@ -9,7 +9,7 @@ import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_conte
 import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_calendar.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_timeline.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_summary.dart';
-import 'package:velmar_ads/features/bookings/presentation/cubit/booking_availability_cubit.dart';
+import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
 
 class ScheduleSelectionPage extends StatefulWidget {
   final Billboard? billboard;
@@ -78,12 +78,12 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
     return Scaffold(
       backgroundColor: AppPallete.background,
       appBar: const ScheduleAppBar(),
-      body: BlocBuilder<BookingAvailabilityCubit, BookingAvailabilityState>(
+      body: BlocBuilder<BookingsBloc, BookingsState>(
         builder: (context, state) {
           return switch (state) {
-            BookingAvailabilityInitial() || BookingAvailabilityLoading() => const Loader(),
-            BookingAvailabilityError(message: final msg) => Center(child: Text(msg)),
-            BookingAvailabilityLoaded(bookings: final bookings) => SingleChildScrollView(
+            BookingsInitial() || BookingsAvailabilityLoading() => const Loader(),
+            BookingsAvailabilityError(message: final msg) => Center(child: Text(msg)),
+            BookingsAvailabilityLoaded(bookings: final bookings) => SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.stackLg),
                   child: Column(
@@ -115,9 +115,14 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                         selectedHours: selectedHours,
                         subtotal: subtotal,
                         onContinue: () {
-                          showSnackBar(
-                            context: context,
-                            message: 'Reserva solicitada para ${b.name} ($selectedHours hrs)',
+                          context.pushNamed(
+                            'upload-asset',
+                            pathParameters: {'id': b.id},
+                            extra: {
+                              'billboard': b,
+                              'selectedDate': _selectedDate,
+                              'selectedSlots': _selectedSlots,
+                            },
                           );
                         },
                       ),
@@ -126,6 +131,7 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                   ),
                 ),
               ),
+            _ => const Loader(),
           };
         },
       ),

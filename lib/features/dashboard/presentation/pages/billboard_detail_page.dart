@@ -12,7 +12,7 @@ import 'package:velmar_ads/features/dashboard/presentation/widgets/billboard_det
 import 'package:velmar_ads/features/dashboard/presentation/widgets/billboard_detail_photos.dart';
 import 'package:velmar_ads/features/dashboard/presentation/widgets/billboard_detail_rates.dart';
 import 'package:velmar_ads/features/dashboard/presentation/widgets/billboard_detail_specs.dart';
-import 'package:velmar_ads/features/bookings/presentation/cubit/booking_availability_cubit.dart';
+import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
 
 class BillboardDetailPage extends StatelessWidget {
   final Billboard? billboard;
@@ -38,12 +38,12 @@ class BillboardDetailPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppPallete.background,
       appBar: const BillboardDetailAppBar(),
-      body: BlocBuilder<BookingAvailabilityCubit, BookingAvailabilityState>(
+      body: BlocBuilder<BookingsBloc, BookingsState>(
         builder: (context, state) {
           return switch (state) {
-            BookingAvailabilityInitial() || BookingAvailabilityLoading() => const Loader(),
-            BookingAvailabilityError(message: final msg) => Center(child: Text(msg)),
-            BookingAvailabilityLoaded(bookings: final bookings) => Stack(
+            BookingsInitial() || BookingsAvailabilityLoading() => const Loader(),
+            BookingsAvailabilityError(message: final msg) => Center(child: Text(msg)),
+            BookingsAvailabilityLoaded(bookings: final bookings) => Stack(
                 children: [
                   Positioned.fill(
                     child: SingleChildScrollView(
@@ -90,6 +90,7 @@ class BillboardDetailPage extends StatelessWidget {
                   ),
                 ],
               ),
+            _ => const Loader(),
           };
         },
       ),

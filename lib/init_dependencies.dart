@@ -18,7 +18,18 @@ import 'package:velmar_ads/features/bookings/data/datasources/bookings_remote_da
 import 'package:velmar_ads/features/bookings/data/repositories/bookings_repository_impl.dart';
 import 'package:velmar_ads/features/bookings/domain/repository/bookings_repository.dart';
 import 'package:velmar_ads/features/bookings/domain/usecases/get_billboard_bookings.dart';
-import 'package:velmar_ads/features/bookings/presentation/cubit/booking_availability_cubit.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/calculate_booking_price.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/create_booking_usecase.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/get_active_booking_type_id.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/get_user_credits.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/get_creative_asset.dart';
+import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
+import 'package:velmar_ads/features/library/data/datasources/library_remote_data_source.dart';
+import 'package:velmar_ads/features/library/data/repositories/library_repository_impl.dart';
+import 'package:velmar_ads/features/library/domain/repository/library_repository.dart';
+import 'package:velmar_ads/features/library/domain/usecases/upload_ad_asset.dart';
+import 'package:velmar_ads/features/library/presentation/bloc/library_bloc.dart';
+
 
 final serviceLocator = GetIt.instance;
 
@@ -26,6 +37,7 @@ Future<void> initDependencies() async {
   _initAuth();
   _initDashboard();
   _initBookings();
+  _initLibrary();
   final supabase = await Supabase.initialize(
     url: AppSecrets.supabaseUrl,
     publishableKey: AppSecrets.supabasePublishableKey,
@@ -83,6 +95,33 @@ void _initBookings() {
       () => BookingsRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => GetBillboardBookings(bookingsRepository: serviceLocator()))
-    ..registerFactory(() => BookingAvailabilityCubit(getBillboardBookings: serviceLocator()));
+    ..registerFactory(() => GetUserCredits(bookingsRepository: serviceLocator()))
+    ..registerFactory(() => GetActiveBookingTypeId(bookingsRepository: serviceLocator()))
+    ..registerFactory(() => CalculateBookingPrice(bookingsRepository: serviceLocator()))
+    ..registerFactory(() => CreateBookingUseCase(bookingsRepository: serviceLocator()))
+    ..registerFactory(() => GetCreativeAsset(bookingsRepository: serviceLocator()))
+    ..registerFactory(
+      () => BookingsBloc(
+        getBillboardBookings: serviceLocator(),
+        getUserCredits: serviceLocator(),
+        getActiveBookingTypeId: serviceLocator(),
+        calculateBookingPrice: serviceLocator(),
+        createBookingUseCase: serviceLocator(),
+        getCreativeAsset: serviceLocator(),
+      ),
+    );
 }
+
+void _initLibrary() {
+  serviceLocator
+    ..registerFactory<LibraryRemoteDataSource>(
+      () => LibraryRemoteDataSourceImpl(supabaseClient: serviceLocator()),
+    )
+    ..registerFactory<LibraryRepository>(
+      () => LibraryRepositoryImpl(remoteDataSource: serviceLocator()),
+    )
+    ..registerFactory(() => UploadAdAsset(repository: serviceLocator()))
+    ..registerFactory(() => LibraryBloc(uploadAdAsset: serviceLocator()));
+}
+
 
