@@ -206,7 +206,7 @@ class _CreditHistoryPageState extends State<CreditHistoryPage> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '+\$$formattedThisMonth este mes',
+                                    '+$formattedThisMonth este mes',
                                     style: AppTypography.bodySm.copyWith(
                                       color: AppPallete.primary,
                                       fontWeight: FontWeight.bold,

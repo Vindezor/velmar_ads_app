@@ -25,7 +25,7 @@ class ProfileMovementItem extends StatelessWidget {
 
     // Format amount
     final formattedAmount = CurrencyFormatter.format(movement.amount.abs()).replaceAll('.00', '');
-    final amountText = isPositive ? '+ \$$formattedAmount' : '- \$$formattedAmount';
+    final amountText = isPositive ? '+$formattedAmount' : '-$formattedAmount';
     final amountColor = isPositive ? const Color(0xFF2E7D32) : AppPallete.onSurface;
 
     // Pick icon based on type / amount

@@ -57,7 +57,7 @@ class ProfileBalanceCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.stackSm),
               Text(
-                '\$$formattedBalance',
+                formattedBalance,
                 style: AppTypography.displayLg.copyWith(
                   color: AppPallete.onSurface,
                   fontWeight: FontWeight.bold,
