@@ -5,21 +5,26 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:velmar_ads/features/profile/domain/entities/profile_details.dart';
 import 'package:velmar_ads/features/profile/domain/usecases/get_profile_details.dart';
+import 'package:velmar_ads/features/profile/domain/usecases/submit_credit_request.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final GetProfileDetails _getProfileDetails;
+  final SubmitCreditRequest _submitCreditRequest;
   final AppUserCubit _appUserCubit;
 
   ProfileBloc({
     required GetProfileDetails getProfileDetails,
+    required SubmitCreditRequest submitCreditRequest,
     required AppUserCubit appUserCubit,
   })  : _getProfileDetails = getProfileDetails,
+        _submitCreditRequest = submitCreditRequest,
         _appUserCubit = appUserCubit,
         super(ProfileInitial()) {
     on<ProfileLoadDetails>(_onLoadDetails);
+    on<ProfileSubmitRequest>(_onSubmitRequest);
     on<ProfileResetState>(_onResetState);
   }
 
@@ -39,6 +44,34 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
       (details) => emit(ProfileLoaded(profileDetails: details)),
+    );
+  }
+
+  Future<void> _onSubmitRequest(
+    ProfileSubmitRequest event,
+    Emitter<ProfileState> emit,
+  ) async {
+    final userState = _appUserCubit.state;
+    if (userState is! AppUserLoggedIn) {
+      emit(ProfileRequestError(message: 'Usuario no autenticado.'));
+      return;
+    }
+
+    emit(ProfileRequestSubmitting());
+
+    final result = await _submitCreditRequest(
+      SubmitCreditRequestParams(
+        amount: event.amount,
+        filePath: event.filePath,
+        fileName: event.fileName,
+        userId: userState.user.id,
+        paymentNotes: event.paymentNotes,
+      ),
+    );
+
+    result.fold(
+      (failure) => emit(ProfileRequestError(message: failure.message)),
+      (_) => emit(ProfileRequestSuccess()),
     );
   }
 

@@ -4,4 +4,12 @@ import 'package:velmar_ads/features/profile/domain/entities/profile_details.dart
 
 abstract interface class ProfileRepository {
   Future<Either<Failure, ProfileDetails>> getProfileDetails(String userId);
+  
+  Future<Either<Failure, void>> submitCreditRequest({
+    required double amount,
+    required String filePath,
+    required String fileName,
+    required String userId,
+    String? paymentNotes,
+  });
 }

@@ -36,6 +36,7 @@ import 'package:velmar_ads/features/profile/data/datasources/profile_remote_data
 import 'package:velmar_ads/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:velmar_ads/features/profile/domain/repository/profile_repository.dart';
 import 'package:velmar_ads/features/profile/domain/usecases/get_profile_details.dart';
+import 'package:velmar_ads/features/profile/domain/usecases/submit_credit_request.dart';
 import 'package:velmar_ads/features/profile/presentation/bloc/profile_bloc.dart';
 
 
@@ -149,9 +150,11 @@ void _initProfile() {
       () => ProfileRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => GetProfileDetails(profileRepository: serviceLocator()))
+    ..registerFactory(() => SubmitCreditRequest(profileRepository: serviceLocator()))
     ..registerFactory(
       () => ProfileBloc(
         getProfileDetails: serviceLocator(),
+        submitCreditRequest: serviceLocator(),
         appUserCubit: serviceLocator(),
       ),
     );

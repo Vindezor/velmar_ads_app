@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:velmar_ads/core/router/app_routes.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/core/utils/currency_formatter.dart';
+import 'package:velmar_ads/features/profile/presentation/bloc/profile_bloc.dart';
 
 class ProfileBalanceCard extends StatelessWidget {
   final double credits;
@@ -70,11 +74,11 @@ class ProfileBalanceCard extends StatelessWidget {
                 height: 48,
                 child: OutlinedButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Solicitud de créditos enviada al administrador.'),
-                      ),
-                    );
+                    context.push(AppRoutes.requestCreditsPath()).then((_) {
+                      if (context.mounted) {
+                        context.read<ProfileBloc>().add(ProfileLoadDetails());
+                      }
+                    });
                   },
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppPallete.primaryContainer),

@@ -45,7 +45,11 @@ class ProfileView extends StatelessWidget {
       body: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
           return switch (state) {
-            ProfileInitial() || ProfileLoading() => const Center(
+            ProfileInitial() ||
+            ProfileLoading() ||
+            ProfileRequestSubmitting() ||
+            ProfileRequestSuccess() ||
+            ProfileRequestError() => const Center(
                 child: CircularProgressIndicator(color: AppPallete.primary),
               ),
             ProfileLoaded(profileDetails: final details) => LayoutBuilder(

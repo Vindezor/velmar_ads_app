@@ -16,3 +16,13 @@ final class ProfileError extends ProfileState {
   final String message;
   ProfileError({required this.message});
 }
+
+// Credit Request submission states
+final class ProfileRequestSubmitting extends ProfileState {}
+
+final class ProfileRequestSuccess extends ProfileState {}
+
+final class ProfileRequestError extends ProfileState {
+  final String message;
+  ProfileRequestError({required this.message});
+}
