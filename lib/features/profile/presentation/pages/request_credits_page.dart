@@ -527,6 +527,7 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
                                         'ENVIAR SOLICITUD',
                                         style: AppTypography.labelMd.copyWith(
                                           fontWeight: FontWeight.bold,
+                                          color: AppPallete.onPrimary,
                                         ),
                                       ),
                                       style: ElevatedButton.styleFrom(
