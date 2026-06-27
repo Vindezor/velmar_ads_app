@@ -5,6 +5,8 @@ sealed class ProfileEvent {}
 
 final class ProfileLoadDetails extends ProfileEvent {}
 
+final class ProfileLoadCreditRequests extends ProfileEvent {}
+
 final class ProfileResetState extends ProfileEvent {}
 
 final class ProfileSubmitRequest extends ProfileEvent {

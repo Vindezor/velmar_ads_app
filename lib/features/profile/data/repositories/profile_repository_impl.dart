@@ -6,6 +6,7 @@ import 'package:velmar_ads/core/error/failures.dart';
 import 'package:velmar_ads/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:velmar_ads/features/profile/data/models/credit_request_model.dart';
 import 'package:velmar_ads/features/profile/domain/entities/profile_details.dart';
+import 'package:velmar_ads/features/profile/domain/entities/credit_request.dart';
 import 'package:velmar_ads/features/profile/domain/repository/profile_repository.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
@@ -69,6 +70,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
       // 4. Submit to database
       await _remoteDataSource.createCreditRequest(request);
       return right(null);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CreditRequest>>> getCreditRequests(String userId) async {
+    try {
+      final requests = await _remoteDataSource.getCreditRequests(userId);
+      return right(requests);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }

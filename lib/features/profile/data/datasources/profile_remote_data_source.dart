@@ -9,6 +9,7 @@ abstract interface class ProfileRemoteDataSource {
   Future<List<MovementModel>> getMovementHistory(String userId);
   Future<String> uploadPaymentProof(String filePath, String fileName, String userId);
   Future<void> createCreditRequest(CreditRequestModel request);
+  Future<List<CreditRequestModel>> getCreditRequests(String userId);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -65,6 +66,22 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<void> createCreditRequest(CreditRequestModel request) async {
     try {
       await supabaseClient.from('credit_requests').insert(request.toJson());
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<CreditRequestModel>> getCreditRequests(String userId) async {
+    try {
+      final response = await supabaseClient
+          .from('credit_requests')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+      return (response as List)
+          .map((json) => CreditRequestModel.fromJson(json))
+          .toList();
     } catch (e) {
       throw ServerException(e.toString());
     }

@@ -26,3 +26,16 @@ final class ProfileRequestError extends ProfileState {
   final String message;
   ProfileRequestError({required this.message});
 }
+
+// Credit Request fetching states
+final class ProfileCreditRequestsLoading extends ProfileState {}
+
+final class ProfileCreditRequestsLoaded extends ProfileState {
+  final List<CreditRequest> creditRequests;
+  ProfileCreditRequestsLoaded({required this.creditRequests});
+}
+
+final class ProfileCreditRequestsError extends ProfileState {
+  final String message;
+  ProfileCreditRequestsError({required this.message});
+}

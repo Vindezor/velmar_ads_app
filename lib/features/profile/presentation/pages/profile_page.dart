@@ -49,7 +49,10 @@ class ProfileView extends StatelessWidget {
             ProfileLoading() ||
             ProfileRequestSubmitting() ||
             ProfileRequestSuccess() ||
-            ProfileRequestError() => const Center(
+            ProfileRequestError() ||
+            ProfileCreditRequestsLoading() ||
+            ProfileCreditRequestsLoaded() ||
+            ProfileCreditRequestsError() => const Center(
                 child: CircularProgressIndicator(color: AppPallete.primary),
               ),
             ProfileLoaded(profileDetails: final details) => LayoutBuilder(

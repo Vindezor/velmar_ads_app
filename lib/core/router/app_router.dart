@@ -21,6 +21,7 @@ import 'package:velmar_ads/features/library/presentation/bloc/library_bloc.dart'
 import 'package:velmar_ads/features/profile/presentation/pages/profile_page.dart';
 import 'package:velmar_ads/features/profile/presentation/pages/credit_history_page.dart';
 import 'package:velmar_ads/features/profile/presentation/pages/request_credits_page.dart';
+import 'package:velmar_ads/features/profile/presentation/pages/credit_requests_page.dart';
 import 'package:velmar_ads/features/profile/domain/entities/movement.dart';
 import 'package:velmar_ads/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
@@ -248,6 +249,16 @@ final GoRouter appRouter = GoRouter(
                     return BlocProvider(
                       create: (context) => serviceLocator<ProfileBloc>(),
                       child: const RequestCreditsPage(),
+                    );
+                  },
+                ),
+                GoRoute(
+                  path: 'requests',
+                  name: 'credit-requests',
+                  builder: (context, state) {
+                    return BlocProvider(
+                      create: (context) => serviceLocator<ProfileBloc>()..add(ProfileLoadCreditRequests()),
+                      child: const CreditRequestsPage(),
                     );
                   },
                 ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:velmar_ads/core/router/app_routes.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/init_dependencies.dart';
 
@@ -94,6 +96,42 @@ class _ProfileMenuOptionsState extends State<ProfileMenuOptions> {
                   activeTrackColor: AppPallete.primary,
                 ),
               ],
+            ),
+          ),
+          const Divider(color: AppPallete.outlineVariant, height: 1),
+          // Credit Requests
+          InkWell(
+            onTap: () {
+              context.push(AppRoutes.creditRequestsPath());
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.gutter),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.receipt_long_outlined,
+                        color: AppPallete.secondary,
+                        size: 24,
+                      ),
+                      const SizedBox(width: AppSpacing.stackMd),
+                      Text(
+                        'Mis solicitudes de crédito',
+                        style: AppTypography.bodyLg.copyWith(
+                          color: AppPallete.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: AppPallete.secondary,
+                    size: 24,
+                  ),
+                ],
+              ),
             ),
           ),
           const Divider(color: AppPallete.outlineVariant, height: 1),
