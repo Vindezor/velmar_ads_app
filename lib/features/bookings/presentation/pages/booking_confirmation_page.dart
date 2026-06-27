@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/core/utils/show_snackbar.dart';
@@ -13,6 +12,8 @@ import 'package:velmar_ads/features/bookings/presentation/widgets/confirmation_d
 import 'package:velmar_ads/features/bookings/presentation/widgets/confirmation_pricing_breakdown.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/confirmation_wallet_impact.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/confirmation_action_area.dart';
+import 'package:velmar_ads/features/bookings/presentation/widgets/booking_success_view.dart';
+import 'package:velmar_ads/features/bookings/presentation/widgets/booking_error_view.dart';
 
 class BookingConfirmationPage extends StatelessWidget {
   final Billboard? billboard;
@@ -68,17 +69,7 @@ class BookingConfirmationPage extends StatelessWidget {
     }
 
     return BlocConsumer<BookingsBloc, BookingsState>(
-      listener: (context, state) {
-        switch (state) {
-          case BookingsConfirmationSuccess():
-            showSnackBar(context: context, message: '¡Reserva creada con éxito!');
-            context.go('/bookings');
-          case BookingsConfirmationFailure(:final error):
-            showSnackBar(context: context, message: 'Error en la reserva: $error');
-          default:
-            break;
-        }
-      },
+      listener: (context, state) {},
       builder: (context, state) {
         return switch (state) {
           BookingsInitial() || BookingsConfirmationLoading() => const Scaffold(
@@ -99,14 +90,47 @@ class BookingConfirmationPage extends StatelessWidget {
                 ),
               ),
             ),
-          BookingsConfirmationSuccess() => const Scaffold(
+          BookingsConfirmationSuccess() => Scaffold(
               backgroundColor: AppPallete.background,
-              appBar: ConfirmationAppBar(),
-              body: Center(child: CircularProgressIndicator()),
+              appBar: const ConfirmationAppBar(),
+              body: BookingSuccessView(
+                billboard: billboard!,
+                startTime: DateTime(
+                  selectedDate!.year,
+                  selectedDate!.month,
+                  selectedDate!.day,
+                  (List<int>.from(selectedSlots!)..sort()).first,
+                ),
+                endTime: DateTime(
+                  selectedDate!.year,
+                  selectedDate!.month,
+                  selectedDate!.day,
+                  (List<int>.from(selectedSlots!)..sort()).last + 1,
+                ),
+              ),
+            ),
+          BookingsConfirmationFailure(:final error, :final currentBalance, :final priceData) => Scaffold(
+              backgroundColor: AppPallete.background,
+              appBar: const ConfirmationAppBar(),
+              body: BookingErrorView(
+                errorMessage: error,
+                currentBalance: currentBalance,
+                totalCredits: (priceData['total'] as num?)?.toDouble() ?? 0.0,
+                onRetry: () {
+                  context.read<BookingsBloc>().add(
+                        BookingsLoadConfirmationData(
+                          userId: (context.read<AppUserCubit>().state as AppUserLoggedIn).user.id,
+                          billboardId: billboard!.id,
+                          selectedDate: selectedDate!,
+                          selectedSlots: selectedSlots!,
+                          assetId: assetId!,
+                        ),
+                      );
+                },
+              ),
             ),
           BookingsConfirmationLoaded() ||
-          BookingsConfirmationSubmitting() ||
-          BookingsConfirmationFailure() =>
+          BookingsConfirmationSubmitting() =>
             _buildConfirmationView(context, state),
           _ => const Scaffold(
               backgroundColor: AppPallete.background,

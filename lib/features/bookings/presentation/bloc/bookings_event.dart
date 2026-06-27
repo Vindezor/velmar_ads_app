@@ -35,3 +35,22 @@ final class BookingsSubmitCheckout extends BookingsEvent {
     required this.assetId,
   });
 }
+
+final class BookingsLoadUserBookings extends BookingsEvent {}
+
+final class BookingsLoadBookingDetail extends BookingsEvent {
+  final String bookingId;
+  BookingsLoadBookingDetail({required this.bookingId});
+}
+
+final class BookingsSubmitCorrection extends BookingsEvent {
+  final String bookingId;
+  final String assetId;
+  final String? notes;
+
+  BookingsSubmitCorrection({
+    required this.bookingId,
+    required this.assetId,
+    this.notes,
+  });
+}

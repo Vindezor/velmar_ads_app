@@ -96,4 +96,42 @@ class BookingsRepositoryImpl implements BookingsRepository {
       return left(Failure(e.message));
     }
   }
+
+  @override
+  Future<Either<Failure, List<Booking>>> getUserBookings(String userId) async {
+    try {
+      final bookings = await _remoteDataSource.getUserBookings(userId);
+      return right(bookings);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Booking>> getBookingDetail(String bookingId) async {
+    try {
+      final booking = await _remoteDataSource.getBookingDetail(bookingId);
+      return right(booking);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resubmitBooking({
+    required String bookingId,
+    required String assetId,
+    String? notes,
+  }) async {
+    try {
+      await _remoteDataSource.resubmitBooking(
+        bookingId: bookingId,
+        assetId: assetId,
+        notes: notes,
+      );
+      return right(null);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
 }

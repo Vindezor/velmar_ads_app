@@ -84,3 +84,39 @@ class BookingsConfirmationLoadFailure extends BookingsState {
   final String error;
   BookingsConfirmationLoadFailure({required this.error});
 }
+
+// User Bookings Retrieval States
+final class BookingsUserBookingsLoading extends BookingsState {}
+
+final class BookingsUserBookingsLoaded extends BookingsState {
+  final List<Booking> bookings;
+  BookingsUserBookingsLoaded({required this.bookings});
+}
+
+final class BookingsUserBookingsError extends BookingsState {
+  final String message;
+  BookingsUserBookingsError({required this.message});
+}
+
+// Booking Detail States
+final class BookingsBookingDetailLoading extends BookingsState {}
+
+final class BookingsBookingDetailLoaded extends BookingsState {
+  final Booking booking;
+  BookingsBookingDetailLoaded({required this.booking});
+}
+
+final class BookingsBookingDetailError extends BookingsState {
+  final String message;
+  BookingsBookingDetailError({required this.message});
+}
+
+// Booking Correction States
+final class BookingsCorrectionSubmitting extends BookingsState {}
+
+final class BookingsCorrectionSuccess extends BookingsState {}
+
+final class BookingsCorrectionFailure extends BookingsState {
+  final String error;
+  BookingsCorrectionFailure({required this.error});
+}

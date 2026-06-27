@@ -21,12 +21,70 @@ abstract interface class BookingsRemoteDataSource {
     required String assetId,
   });
   Future<Map<String, dynamic>> getCreativeAsset(String assetId);
+  Future<List<BookingModel>> getUserBookings(String userId);
+  Future<BookingModel> getBookingDetail(String bookingId);
+  Future<void> resubmitBooking({required String bookingId, required String assetId, String? notes});
 }
 
 class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   final SupabaseClient supabaseClient;
 
   const BookingsRemoteDataSourceImpl({required this.supabaseClient});
+
+  @override
+  Future<void> resubmitBooking({required String bookingId, required String assetId, String? notes}) async {
+    try {
+      final currentResponse = await supabaseClient
+          .from('bookings')
+          .select('resubmission_count')
+          .eq('id', bookingId)
+          .single();
+      final resubmissionCount = (currentResponse['resubmission_count'] as num?)?.toInt() ?? 0;
+
+      await supabaseClient
+          .from('bookings')
+          .update({
+            'asset_id': assetId,
+            'status': 'resubmitted',
+            'resubmission_count': resubmissionCount + 1,
+            'notes': notes,
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('id', bookingId);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<BookingModel> getBookingDetail(String bookingId) async {
+    try {
+      final response = await supabaseClient
+          .from('bookings')
+          .select('*, billboards(*), booking_types(*), creative_assets(*)')
+          .eq('id', bookingId)
+          .single();
+      return BookingModel.fromJson(response);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<BookingModel>> getUserBookings(String userId) async {
+    try {
+      final response = await supabaseClient
+          .from('bookings')
+          .select('*, billboards(name)')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+
+      final list = response as List<dynamic>;
+      return list.map((json) => BookingModel.fromJson(json)).toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
 
   @override
   Future<Map<String, dynamic>> getCreativeAsset(String assetId) async {

@@ -5,6 +5,7 @@ class CustomNavBarItem extends StatelessWidget {
   final int index;
   final int currentIndex;
   final IconData icon;
+  final IconData? activeIcon;
   final String label;
   final VoidCallback onTap;
 
@@ -13,6 +14,7 @@ class CustomNavBarItem extends StatelessWidget {
     required this.index,
     required this.currentIndex,
     required this.icon,
+    this.activeIcon,
     required this.label,
     required this.onTap,
   });
@@ -22,30 +24,39 @@ class CustomNavBarItem extends StatelessWidget {
     final isActive = index == currentIndex;
     final color = isActive ? AppPallete.primary : AppPallete.secondary;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: AppTypography.labelSm.copyWith(
+    return Container(
+      constraints: const BoxConstraints(minWidth: 64),
+      decoration: BoxDecoration(
+        color: isActive 
+            ? AppPallete.primary.withValues(alpha: 0.1) 
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isActive ? (activeIcon ?? icon) : icon,
                 color: color,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                fontSize: 10,
+                size: 24,
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: AppTypography.labelSm.copyWith(
+                  color: color,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

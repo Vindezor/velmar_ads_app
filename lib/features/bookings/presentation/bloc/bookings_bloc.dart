@@ -12,6 +12,10 @@ import 'package:velmar_ads/features/bookings/domain/usecases/create_booking_usec
 import 'package:velmar_ads/features/bookings/domain/usecases/get_active_booking_type_id.dart';
 import 'package:velmar_ads/features/bookings/domain/usecases/get_user_credits.dart';
 import 'package:velmar_ads/features/bookings/domain/usecases/get_creative_asset.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/get_user_bookings.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/get_booking_detail.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/resubmit_booking.dart';
+import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 
 part 'bookings_event.dart';
 part 'bookings_state.dart';
@@ -23,6 +27,10 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
   final CalculateBookingPrice _calculateBookingPrice;
   final CreateBookingUseCase _createBookingUseCase;
   final GetCreativeAsset _getCreativeAsset;
+  final GetUserBookings _getUserBookings;
+  final GetBookingDetail _getBookingDetail;
+  final ResubmitBooking _resubmitBooking;
+  final AppUserCubit _appUserCubit;
 
   BookingsBloc({
     required GetBillboardBookings getBillboardBookings,
@@ -31,16 +39,27 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     required CalculateBookingPrice calculateBookingPrice,
     required CreateBookingUseCase createBookingUseCase,
     required GetCreativeAsset getCreativeAsset,
+    required GetUserBookings getUserBookings,
+    required GetBookingDetail getBookingDetail,
+    required ResubmitBooking resubmitBooking,
+    required AppUserCubit appUserCubit,
   })  : _getBillboardBookings = getBillboardBookings,
         _getUserCredits = getUserCredits,
         _getActiveBookingTypeId = getActiveBookingTypeId,
         _calculateBookingPrice = calculateBookingPrice,
         _createBookingUseCase = createBookingUseCase,
         _getCreativeAsset = getCreativeAsset,
+        _getUserBookings = getUserBookings,
+        _getBookingDetail = getBookingDetail,
+        _resubmitBooking = resubmitBooking,
+        _appUserCubit = appUserCubit,
         super(BookingsInitial()) {
     on<BookingsFetchAvailability>(_onFetchAvailability);
     on<BookingsLoadConfirmationData>(_onLoadConfirmationData);
     on<BookingsSubmitCheckout>(_onSubmitCheckout);
+    on<BookingsLoadUserBookings>(_onLoadUserBookings);
+    on<BookingsLoadBookingDetail>(_onLoadBookingDetail);
+    on<BookingsSubmitCorrection>(_onSubmitCorrection);
   }
 
   Future<void> _onFetchAvailability(
@@ -248,6 +267,53 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
           );
         }
       },
+    );
+  }
+
+  Future<void> _onLoadUserBookings(
+    BookingsLoadUserBookings event,
+    Emitter<BookingsState> emit,
+  ) async {
+    emit(BookingsUserBookingsLoading());
+    final userState = _appUserCubit.state;
+    if (userState is! AppUserLoggedIn) {
+      emit(BookingsUserBookingsError(message: 'Usuario no autenticado.'));
+      return;
+    }
+    final res = await _getUserBookings(userState.user.id);
+    res.fold(
+      (failure) => emit(BookingsUserBookingsError(message: failure.message)),
+      (bookings) => emit(BookingsUserBookingsLoaded(bookings: bookings)),
+    );
+  }
+
+  Future<void> _onLoadBookingDetail(
+    BookingsLoadBookingDetail event,
+    Emitter<BookingsState> emit,
+  ) async {
+    emit(BookingsBookingDetailLoading());
+    final res = await _getBookingDetail(event.bookingId);
+    res.fold(
+      (failure) => emit(BookingsBookingDetailError(message: failure.message)),
+      (booking) => emit(BookingsBookingDetailLoaded(booking: booking)),
+    );
+  }
+
+  Future<void> _onSubmitCorrection(
+    BookingsSubmitCorrection event,
+    Emitter<BookingsState> emit,
+  ) async {
+    emit(BookingsCorrectionSubmitting());
+    final res = await _resubmitBooking(
+      ResubmitBookingParams(
+        bookingId: event.bookingId,
+        assetId: event.assetId,
+        notes: event.notes,
+      ),
+    );
+    res.fold(
+      (failure) => emit(BookingsCorrectionFailure(error: failure.message)),
+      (_) => emit(BookingsCorrectionSuccess()),
     );
   }
 }
