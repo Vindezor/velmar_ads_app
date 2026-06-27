@@ -89,8 +89,13 @@ class ProfileView extends StatelessWidget {
                     onRefresh: () async {
                       final bloc = context.read<ProfileBloc>();
                       bloc.add(ProfileLoadDetails());
-                      // Wait for the state to transition out of loading or completed
-                      await bloc.stream.firstWhere((state) => state is! ProfileLoading);
+                      // Esperar a que termine de recargar (isRefreshing sea false) o falle
+                      await bloc.stream.firstWhere((state) {
+                        if (state is ProfileLoaded) {
+                          return !state.isRefreshing;
+                        }
+                        return true; // Detener en caso de error u otro estado
+                      });
                     },
                     color: AppPallete.primary,
                     child: SingleChildScrollView(
