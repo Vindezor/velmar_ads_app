@@ -7,6 +7,7 @@ import 'package:velmar_ads/core/router/app_routes.dart';
 import 'package:velmar_ads/features/auth/presentation/pages/login_page.dart';
 import 'package:velmar_ads/features/auth/presentation/pages/signup_page.dart';
 import 'package:velmar_ads/features/bookings/presentation/pages/bookings_page.dart';
+import 'package:velmar_ads/features/bookings/presentation/pages/booking_detail_page.dart';
 import 'package:velmar_ads/features/bookings/presentation/pages/schedule_selection_page.dart';
 import 'package:velmar_ads/features/bookings/presentation/pages/booking_confirmation_page.dart';
 import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
@@ -187,6 +188,16 @@ final GoRouter appRouter = GoRouter(
               path: AppRoutes.bookings,
               name: 'bookings',
               builder: (context, state) => const BookingsPage(),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  name: 'booking-detail',
+                  builder: (context, state) {
+                    final id = state.pathParameters['id'] ?? '';
+                    return BookingDetailPage(bookingId: id);
+                  },
+                ),
+              ],
             ),
           ],
         ),

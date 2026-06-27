@@ -11,12 +11,32 @@ class BookingModel extends Booking {
     required super.totalCredits,
     super.billboardName,
     super.billboardImageUrl,
+    super.billboardAddress,
+    super.billboardScreenType,
+    super.billboardResolution,
+    super.assetFileUrl,
+    super.assetFileType,
+    super.assetFileSizeMb,
+    super.assetOriginalFilename,
+    super.bookingTypeSlotDuration,
+    super.bookingTypeMaxAdsPerSlot,
+    super.moderationNotes,
+    super.notes,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
     final billboardData = json['billboards'] as Map<String, dynamic>?;
     final billboardName = billboardData?['name'] as String?;
     final billboardImageUrl = billboardName != null ? _getFallbackImage(billboardName) : null;
+
+    final assetData = json['creative_assets'] as Map<String, dynamic>?;
+    final bookingTypeData = json['booking_types'] as Map<String, dynamic>?;
+
+    final resolutionW = billboardData?['resolution_w'];
+    final resolutionH = billboardData?['resolution_h'];
+    final resString = (resolutionW != null && resolutionH != null)
+        ? '${resolutionW}x$resolutionH px'
+        : null;
 
     return BookingModel(
       id: json['id'] as String? ?? '',
@@ -28,6 +48,17 @@ class BookingModel extends Booking {
       totalCredits: (json['total_credits'] as num?)?.toDouble() ?? 0.0,
       billboardName: billboardName,
       billboardImageUrl: billboardImageUrl,
+      billboardAddress: billboardData?['address'] as String?,
+      billboardScreenType: billboardData?['screen_type'] as String?,
+      billboardResolution: resString,
+      assetFileUrl: assetData?['file_url'] as String?,
+      assetFileType: assetData?['file_type'] as String?,
+      assetFileSizeMb: (assetData?['file_size_mb'] as num?)?.toDouble(),
+      assetOriginalFilename: assetData?['original_filename'] as String?,
+      bookingTypeSlotDuration: bookingTypeData?['slot_duration_minutes'] as int?,
+      bookingTypeMaxAdsPerSlot: bookingTypeData?['max_ads_per_slot'] as int?,
+      moderationNotes: json['moderation_notes'] as String?,
+      notes: json['notes'] as String?,
     );
   }
 

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:velmar_ads/core/router/app_routes.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/core/utils/currency_formatter.dart';
 import 'package:velmar_ads/core/utils/date_formatter.dart';
@@ -225,7 +227,10 @@ class BookingCard extends StatelessWidget {
       );
     }
 
-    return cardContent;
+    return GestureDetector(
+      onTap: () => context.push(AppRoutes.bookingDetailPath(booking.id)),
+      child: cardContent,
+    );
   }
 
   Widget _buildImage(String url, bool grayscale) {

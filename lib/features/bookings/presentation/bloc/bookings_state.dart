@@ -97,3 +97,16 @@ final class BookingsUserBookingsError extends BookingsState {
   final String message;
   BookingsUserBookingsError({required this.message});
 }
+
+// Booking Detail States
+final class BookingsBookingDetailLoading extends BookingsState {}
+
+final class BookingsBookingDetailLoaded extends BookingsState {
+  final Booking booking;
+  BookingsBookingDetailLoaded({required this.booking});
+}
+
+final class BookingsBookingDetailError extends BookingsState {
+  final String message;
+  BookingsBookingDetailError({required this.message});
+}

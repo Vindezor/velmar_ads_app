@@ -37,3 +37,8 @@ final class BookingsSubmitCheckout extends BookingsEvent {
 }
 
 final class BookingsLoadUserBookings extends BookingsEvent {}
+
+final class BookingsLoadBookingDetail extends BookingsEvent {
+  final String bookingId;
+  BookingsLoadBookingDetail({required this.bookingId});
+}

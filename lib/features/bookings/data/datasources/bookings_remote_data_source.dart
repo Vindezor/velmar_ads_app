@@ -22,12 +22,27 @@ abstract interface class BookingsRemoteDataSource {
   });
   Future<Map<String, dynamic>> getCreativeAsset(String assetId);
   Future<List<BookingModel>> getUserBookings(String userId);
+  Future<BookingModel> getBookingDetail(String bookingId);
 }
 
 class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   final SupabaseClient supabaseClient;
 
   const BookingsRemoteDataSourceImpl({required this.supabaseClient});
+
+  @override
+  Future<BookingModel> getBookingDetail(String bookingId) async {
+    try {
+      final response = await supabaseClient
+          .from('bookings')
+          .select('*, billboards(*), booking_types(*), creative_assets(*)')
+          .eq('id', bookingId)
+          .single();
+      return BookingModel.fromJson(response);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
 
   @override
   Future<List<BookingModel>> getUserBookings(String userId) async {

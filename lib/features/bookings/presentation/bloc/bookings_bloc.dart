@@ -13,6 +13,7 @@ import 'package:velmar_ads/features/bookings/domain/usecases/get_active_booking_
 import 'package:velmar_ads/features/bookings/domain/usecases/get_user_credits.dart';
 import 'package:velmar_ads/features/bookings/domain/usecases/get_creative_asset.dart';
 import 'package:velmar_ads/features/bookings/domain/usecases/get_user_bookings.dart';
+import 'package:velmar_ads/features/bookings/domain/usecases/get_booking_detail.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 
 part 'bookings_event.dart';
@@ -26,6 +27,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
   final CreateBookingUseCase _createBookingUseCase;
   final GetCreativeAsset _getCreativeAsset;
   final GetUserBookings _getUserBookings;
+  final GetBookingDetail _getBookingDetail;
   final AppUserCubit _appUserCubit;
 
   BookingsBloc({
@@ -36,6 +38,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     required CreateBookingUseCase createBookingUseCase,
     required GetCreativeAsset getCreativeAsset,
     required GetUserBookings getUserBookings,
+    required GetBookingDetail getBookingDetail,
     required AppUserCubit appUserCubit,
   })  : _getBillboardBookings = getBillboardBookings,
         _getUserCredits = getUserCredits,
@@ -44,12 +47,14 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
         _createBookingUseCase = createBookingUseCase,
         _getCreativeAsset = getCreativeAsset,
         _getUserBookings = getUserBookings,
+        _getBookingDetail = getBookingDetail,
         _appUserCubit = appUserCubit,
         super(BookingsInitial()) {
     on<BookingsFetchAvailability>(_onFetchAvailability);
     on<BookingsLoadConfirmationData>(_onLoadConfirmationData);
     on<BookingsSubmitCheckout>(_onSubmitCheckout);
     on<BookingsLoadUserBookings>(_onLoadUserBookings);
+    on<BookingsLoadBookingDetail>(_onLoadBookingDetail);
   }
 
   Future<void> _onFetchAvailability(
@@ -274,6 +279,18 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     res.fold(
       (failure) => emit(BookingsUserBookingsError(message: failure.message)),
       (bookings) => emit(BookingsUserBookingsLoaded(bookings: bookings)),
+    );
+  }
+
+  Future<void> _onLoadBookingDetail(
+    BookingsLoadBookingDetail event,
+    Emitter<BookingsState> emit,
+  ) async {
+    emit(BookingsBookingDetailLoading());
+    final res = await _getBookingDetail(event.bookingId);
+    res.fold(
+      (failure) => emit(BookingsBookingDetailError(message: failure.message)),
+      (booking) => emit(BookingsBookingDetailLoaded(booking: booking)),
     );
   }
 }
