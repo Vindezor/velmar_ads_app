@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/features/bookings/domain/entities/booking.dart';
 import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
-import 'package:velmar_ads/features/bookings/presentation/widgets/bookings_app_bar.dart';
+import 'package:velmar_ads/core/common/widgets/velmar_app_bar.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/bookings_list_error_view.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/booking_status_banner.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/booking_asset_player.dart';
@@ -43,7 +43,7 @@ class BookingDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppPallete.background,
-      appBar: const BookingsAppBar(),
+      appBar: const VelmarAppBar(),
       body: BlocBuilder<BookingsBloc, BookingsState>(
         builder: (context, state) {
           return switch (state) {

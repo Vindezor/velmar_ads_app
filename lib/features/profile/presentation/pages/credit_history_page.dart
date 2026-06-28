@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/core/utils/currency_formatter.dart';
-import 'package:velmar_ads/features/bookings/presentation/widgets/bookings_app_bar.dart';
+import 'package:velmar_ads/core/common/widgets/velmar_app_bar.dart';
 import 'package:velmar_ads/features/profile/domain/entities/movement.dart';
 
 class CreditHistoryPage extends StatefulWidget {
@@ -119,7 +119,7 @@ class _CreditHistoryPageState extends State<CreditHistoryPage> {
 
     return Scaffold(
       backgroundColor: AppPallete.background,
-      appBar: const BookingsAppBar(),
+      appBar: const VelmarAppBar(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(

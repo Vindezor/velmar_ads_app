@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
-import 'package:velmar_ads/features/bookings/presentation/widgets/bookings_app_bar.dart';
+import 'package:velmar_ads/core/common/widgets/velmar_app_bar.dart';
 import 'package:velmar_ads/features/profile/presentation/bloc/profile_bloc.dart';
 
 class RequestCreditsPage extends StatefulWidget {
@@ -119,7 +119,7 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
 
     return Scaffold(
       backgroundColor: AppPallete.background,
-      appBar: const BookingsAppBar(),
+      appBar: const VelmarAppBar(),
       body: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (context, state) {
           if (state is ProfileRequestSuccess) {

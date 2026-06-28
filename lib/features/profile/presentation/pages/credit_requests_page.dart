@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
-import 'package:velmar_ads/features/bookings/presentation/widgets/bookings_app_bar.dart';
+import 'package:velmar_ads/core/common/widgets/velmar_app_bar.dart';
 import 'package:velmar_ads/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:velmar_ads/features/profile/presentation/widgets/credit_requests_list.dart';
 import 'package:velmar_ads/features/profile/presentation/widgets/credit_requests_error_view.dart';
@@ -13,7 +13,7 @@ class CreditRequestsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppPallete.surfaceContainerLowest,
-      appBar: const BookingsAppBar(),
+      appBar: const VelmarAppBar(),
       body: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
           return switch (state) {

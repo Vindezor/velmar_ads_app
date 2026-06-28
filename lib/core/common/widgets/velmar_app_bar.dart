@@ -3,11 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/router/app_routes.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 
-class BookingsAppBar extends StatelessWidget implements PreferredSizeWidget {
+class VelmarAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showBackButton;
   final VoidCallback? onNotificationTap;
 
-  const BookingsAppBar({
+  const VelmarAppBar({
     super.key,
     this.showBackButton = true,
     this.onNotificationTap,

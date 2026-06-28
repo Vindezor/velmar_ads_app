@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/common/widgets/loader.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:velmar_ads/features/dashboard/presentation/widgets/dashboard_app_bar.dart';
+import 'package:velmar_ads/core/common/widgets/velmar_app_bar.dart';
 import 'package:velmar_ads/features/dashboard/presentation/widgets/dashboard_error_view.dart';
 import 'package:velmar_ads/features/dashboard/presentation/widgets/dashboard_loaded_view.dart';
 
@@ -35,7 +35,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppPallete.background,
-      appBar: const DashboardAppBar(),
+      appBar: const VelmarAppBar(showBackButton: false),
       body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
           return switch (state) {
