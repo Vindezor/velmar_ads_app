@@ -57,7 +57,7 @@ class LibraryEmptyView extends StatelessWidget {
               ),
             ),
             // Action Button
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () {
                 try {
                   StatefulNavigationShell.of(context).goBranch(0);
@@ -65,18 +65,28 @@ class LibraryEmptyView extends StatelessWidget {
                   context.go(AppRoutes.dashboard);
                 }
               },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
+              icon: const Icon(
+                Icons.explore,
+                size: 20,
+                color: AppPallete.onPrimary,
               ),
-              child: Text(
-                'Ir al mapa',
+              label: Text(
+                'Explorar mapa',
                 style: AppTypography.labelMd.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppPallete.onPrimary,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppPallete.primary,
+                foregroundColor: AppPallete.onPrimary,
+                elevation: 0,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: AppRadius.borderMd,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 14,
                 ),
               ),
             ),
