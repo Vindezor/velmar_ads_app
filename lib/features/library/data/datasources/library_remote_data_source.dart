@@ -9,11 +9,15 @@ abstract interface class LibraryRemoteDataSource {
     required String userId,
   });
 
+  Future<void> deleteAdContent(String path);
+
   Future<String> createCreativeAsset({
     required String userId,
     required String fileUrl,
     required String fileName,
   });
+
+  Future<void> deleteCreativeAsset(String assetId);
 }
 
 class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
@@ -41,6 +45,15 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   }
 
   @override
+  Future<void> deleteAdContent(String path) async {
+    try {
+      await supabaseClient.storage.from('ad-content').remove([path]);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
   Future<String> createCreativeAsset({
     required String userId,
     required String fileUrl,
@@ -56,6 +69,15 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
         'status': 'pending',
       }).select('id').single();
       return response['id'] as String;
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteCreativeAsset(String assetId) async {
+    try {
+      await supabaseClient.from('creative_assets').delete().eq('id', assetId);
     } catch (e) {
       throw ServerException(e.toString());
     }

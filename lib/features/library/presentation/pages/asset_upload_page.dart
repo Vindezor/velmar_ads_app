@@ -40,6 +40,8 @@ class _AssetUploadPageState extends State<AssetUploadPage>
   double _uploadProgress = 0.0;
   UploadState _state = UploadState.idle;
   String? _uploadedAssetId;
+  String? _uploadedFileName;
+  bool _isNavigatingToConfirmation = false;
 
   @override
   void initState() {
@@ -85,6 +87,7 @@ class _AssetUploadPageState extends State<AssetUploadPage>
       _state = UploadState.uploading;
       _uploadProgress = 0.0;
       _uploadedAssetId = null;
+      _uploadedFileName = null;
     });
 
     _uploadController.forward(from: 0.0);
@@ -106,6 +109,10 @@ class _AssetUploadPageState extends State<AssetUploadPage>
 
       if (!mounted) return;
 
+      setState(() {
+        _uploadedFileName = fileName;
+      });
+
       context.read<LibraryBloc>().add(
             LibraryUploadAsset(
               fileBytes: fileBytes,
@@ -120,13 +127,30 @@ class _AssetUploadPageState extends State<AssetUploadPage>
     }
   }
 
+  void _cleanupUploadedAsset() {
+    if (_uploadedAssetId != null && _uploadedFileName != null) {
+      final userState = context.read<AppUserCubit>().state;
+      if (userState is AppUserLoggedIn) {
+        context.read<LibraryBloc>().add(
+              LibraryDeleteAsset(
+                assetId: _uploadedAssetId!,
+                fileName: _uploadedFileName!,
+                userId: userState.user.id,
+              ),
+            );
+      }
+    }
+  }
+
   void _cancelUpload() {
+    _cleanupUploadedAsset();
     _uploadController.reset();
     context.read<LibraryBloc>().add(LibraryReset());
     setState(() {
       _state = UploadState.idle;
       _uploadProgress = 0.0;
       _uploadedAssetId = null;
+      _uploadedFileName = null;
     });
   }
 
@@ -138,7 +162,7 @@ class _AssetUploadPageState extends State<AssetUploadPage>
     }
   }
 
-  void _onConfirmPressed() {
+  void _onConfirmPressed() async {
     final b = widget.billboard;
     final selectedDate = widget.selectedDate;
     final selectedSlots = widget.selectedSlots;
@@ -152,7 +176,11 @@ class _AssetUploadPageState extends State<AssetUploadPage>
       return;
     }
 
-    context.pushNamed(
+    setState(() {
+      _isNavigatingToConfirmation = true;
+    });
+
+    await context.pushNamed(
       'booking-confirmation',
       pathParameters: {'id': b.id},
       extra: {
@@ -162,6 +190,12 @@ class _AssetUploadPageState extends State<AssetUploadPage>
         'assetId': assetId,
       },
     );
+
+    if (mounted) {
+      setState(() {
+        _isNavigatingToConfirmation = false;
+      });
+    }
   }
 
   @override
@@ -197,71 +231,79 @@ class _AssetUploadPageState extends State<AssetUploadPage>
         }
       },
       builder: (context, state) {
-        return Scaffold(
-          backgroundColor: AppPallete.background,
-          appBar: const AssetUploadAppBar(),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.containerPadding,
-                vertical: AppSpacing.stackLg,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const AssetUploadHeader(),
-                  const SizedBox(height: AppSpacing.stackLg),
-                  // Options Container
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppPallete.surfaceContainerLowest,
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(AppRadius.lg),
+        return PopScope(
+          canPop: true,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop && !_isNavigatingToConfirmation) {
+              _cleanupUploadedAsset();
+            }
+          },
+          child: Scaffold(
+            backgroundColor: AppPallete.background,
+            appBar: const AssetUploadAppBar(),
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.containerPadding,
+                  vertical: AppSpacing.stackLg,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const AssetUploadHeader(),
+                    const SizedBox(height: AppSpacing.stackLg),
+                    // Options Container
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppPallete.surfaceContainerLowest,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(AppRadius.lg),
+                        ),
+                        border: Border.all(color: AppPallete.borderColor),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      border: Border.all(color: AppPallete.borderColor),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        const AssetUploadTabs(),
-                        Padding(
-                          padding: const EdgeInsets.all(
-                            AppSpacing.containerPadding,
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          const AssetUploadTabs(),
+                          Padding(
+                            padding: const EdgeInsets.all(
+                              AppSpacing.containerPadding,
+                            ),
+                            child: Column(
+                              children: [
+                                if (_state == UploadState.idle)
+                                  AssetUploadDropzone(
+                                    onUploadTriggered: _startUpload,
+                                  ),
+                                if (_state == UploadState.uploading)
+                                  AssetUploadProgress(
+                                    progress: _uploadProgress,
+                                    onCancel: _cancelUpload,
+                                  ),
+                                if (_state == UploadState.completed)
+                                  const AssetUploadPreview(),
+                              ],
+                            ),
                           ),
-                          child: Column(
-                            children: [
-                              if (_state == UploadState.idle)
-                                AssetUploadDropzone(
-                                  onUploadTriggered: _startUpload,
-                                ),
-                              if (_state == UploadState.uploading)
-                                AssetUploadProgress(
-                                  progress: _uploadProgress,
-                                  onCancel: _cancelUpload,
-                                ),
-                              if (_state == UploadState.completed)
-                                const AssetUploadPreview(),
-                            ],
+                          AssetUploadFooter(
+                            onCancel: _onCancelPressed,
+                            onConfirm: _state == UploadState.completed
+                                ? _onConfirmPressed
+                                : null,
                           ),
-                        ),
-                        AssetUploadFooter(
-                          onCancel: _onCancelPressed,
-                          onConfirm: _state == UploadState.completed
-                              ? _onConfirmPressed
-                              : null,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.stackLg),
-                ],
+                    const SizedBox(height: AppSpacing.stackLg),
+                  ],
+                ),
               ),
             ),
           ),

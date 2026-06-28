@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:velmar_ads/core/common/widgets/velmar_app_bar.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/features/bookings/domain/entities/booking.dart';
 import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
-import 'package:velmar_ads/features/bookings/presentation/widgets/bookings_app_bar.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/correction_warning_banner.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/correction_rejected_asset_card.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/correction_upload_zone.dart';
@@ -187,7 +187,7 @@ class _BookingCorrectionViewState extends State<BookingCorrectionView>
 
     return Scaffold(
       backgroundColor: AppPallete.background,
-      appBar: const BookingsAppBar(),
+      appBar: const VelmarAppBar(),
       body: MultiBlocListener(
         listeners: [
           BlocListener<LibraryBloc, LibraryState>(

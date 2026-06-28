@@ -7,4 +7,10 @@ abstract interface class LibraryRepository {
     required String fileName,
     required String userId,
   });
+
+  Future<Either<Failure, void>> deleteAdAsset({
+    required String assetId,
+    required String fileName,
+    required String userId,
+  });
 }

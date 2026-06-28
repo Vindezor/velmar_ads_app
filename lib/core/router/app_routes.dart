@@ -11,6 +11,9 @@ class AppRoutes {
   static const bookingConfirmation = '/booking-confirmation/:id';
   static const bookingDetail = '/bookings/:id';
   static const bookingCorrect = '/bookings/:id/correct';
+  static const creditHistory = '/profile/history';
+  static const requestCredits = '/profile/request';
+  static const creditRequests = '/profile/requests';
 
   static String billboardDetailPath(String id) => '/dashboard/billboard/$id';
   static String selectSchedulePath(String id) => '/dashboard/billboard/$id/book';
@@ -18,4 +21,7 @@ class AppRoutes {
   static String bookingConfirmationPath(String id) => '/booking-confirmation/$id';
   static String bookingDetailPath(String id) => '/bookings/$id';
   static String bookingCorrectPath(String id) => '/bookings/$id/correct';
+  static String creditHistoryPath() => '/profile/history';
+  static String requestCreditsPath() => '/profile/request';
+  static String creditRequestsPath() => '/profile/requests';
 }

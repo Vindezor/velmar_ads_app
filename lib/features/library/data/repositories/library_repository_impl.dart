@@ -18,12 +18,16 @@ class LibraryRepositoryImpl implements LibraryRepository {
     required String fileName,
     required String userId,
   }) async {
+    final path = '$userId/$fileName';
+    bool isUploaded = false;
+
     try {
       final fileUrl = await _remoteDataSource.uploadAdContent(
         fileBytes: fileBytes,
         fileName: fileName,
         userId: userId,
       );
+      isUploaded = true;
 
       final assetId = await _remoteDataSource.createCreativeAsset(
         userId: userId,
@@ -32,6 +36,27 @@ class LibraryRepositoryImpl implements LibraryRepository {
       );
 
       return right(assetId);
+    } on ServerException catch (e) {
+      if (isUploaded) {
+        try {
+          await _remoteDataSource.deleteAdContent(path);
+        } catch (_) {}
+      }
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteAdAsset({
+    required String assetId,
+    required String fileName,
+    required String userId,
+  }) async {
+    try {
+      await _remoteDataSource.deleteCreativeAsset(assetId);
+      final path = '$userId/$fileName';
+      await _remoteDataSource.deleteAdContent(path);
+      return right(null);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }

@@ -9,11 +9,15 @@ class UserModel extends User {
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final metadata = json['user_metadata'] as Map<String, dynamic>?;
+    final parsedName = json['name'] ?? json['full_name'] ?? metadata?['full_name'] ?? '';
+    final parsedPhone = json['phone'] ?? json['phone_number'] ?? metadata?['phone'] ?? '';
+    
     return UserModel(
       id: json['id'] ?? '',
-      name: json['name'] ?? '',
+      name: parsedName,
       email: json['email'] ?? '',
-      phone: json['phone'] ?? '',
+      phone: parsedPhone,
     );
   }
 
