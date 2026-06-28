@@ -67,7 +67,7 @@ class _ProfileViewState extends State<ProfileView> {
 
     return Scaffold(
       backgroundColor: AppPallete.background,
-      appBar: const BookingsAppBar(),
+      appBar: const BookingsAppBar(showBackButton: false),
       body: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
           return switch (state) {

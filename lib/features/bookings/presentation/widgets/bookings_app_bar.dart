@@ -4,7 +4,12 @@ import 'package:velmar_ads/core/router/app_routes.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 
 class BookingsAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const BookingsAppBar({super.key});
+  final bool showBackButton;
+
+  const BookingsAppBar({
+    super.key,
+    this.showBackButton = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -12,16 +17,18 @@ class BookingsAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: AppPallete.surface,
       elevation: 0,
       scrolledUnderElevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: AppPallete.primary),
-        onPressed: () {
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop();
-          } else {
-            context.go(AppRoutes.dashboard);
-          }
-        },
-      ),
+      leading: showBackButton
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppPallete.primary),
+              onPressed: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                } else {
+                  context.go(AppRoutes.dashboard);
+                }
+              },
+            )
+          : null,
       title: Text(
         'Velmar Ads',
         style: AppTypography.headlineMd.copyWith(

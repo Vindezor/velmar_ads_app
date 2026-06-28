@@ -27,7 +27,7 @@ class BookingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppPallete.background,
-      appBar: const BookingsAppBar(),
+      appBar: const BookingsAppBar(showBackButton: false),
       body: BlocBuilder<BookingsBloc, BookingsState>(
         builder: (context, state) {
           return switch (state) {
