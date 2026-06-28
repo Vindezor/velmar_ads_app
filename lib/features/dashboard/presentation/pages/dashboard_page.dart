@@ -17,6 +17,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late final DashboardBloc _dashboardBloc;
+  int? _lastIndex;
 
   @override
   void initState() {
@@ -33,6 +34,24 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen to StatefulNavigationShell index changes
+    try {
+      final shell = StatefulNavigationShell.of(context);
+      final currentIndex = shell.currentIndex;
+      
+      // If the user just switched to the Dashboard tab (index 0), trigger refresh
+      if (currentIndex == 0 && _lastIndex != 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _dashboardBloc.add(DashboardFetchData());
+          }
+        });
+      }
+      _lastIndex = currentIndex;
+    } catch (_) {
+      // In case StatefulNavigationShell is not present in context (e.g. testing)
+    }
+
     return Scaffold(
       backgroundColor: AppPallete.background,
       appBar: const VelmarAppBar(showBackButton: false),
