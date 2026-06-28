@@ -23,6 +23,16 @@ class LibraryRepositoryImpl implements LibraryRepository {
     bool isUploaded = false;
 
     try {
+      // Check if a creative asset with this original filename already exists for this user
+      final existingAssets = await _remoteDataSource.getUserAssets(userId);
+      final duplicateExists = existingAssets.any(
+        (asset) => asset.originalFilename.toLowerCase() == fileName.toLowerCase(),
+      );
+
+      if (duplicateExists) {
+        return left(Failure('Ya tienes un anuncio con este nombre en tu biblioteca. Elige el archivo existente o cámbiale el nombre para continuar.'));
+      }
+
       final fileUrl = await _remoteDataSource.uploadAdContent(
         fileBytes: fileBytes,
         fileName: fileName,
