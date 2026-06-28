@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/bookings_app_bar.dart';
@@ -23,8 +24,15 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-class ProfileView extends StatelessWidget {
+class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
+
+  @override
+  State<ProfileView> createState() => _ProfileViewState();
+}
+
+class _ProfileViewState extends State<ProfileView> {
+  int? _lastIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +46,24 @@ class ProfileView extends StatelessWidget {
     }
 
     final currentUser = userState.user;
+
+    // Listen to StatefulNavigationShell index changes
+    try {
+      final shell = StatefulNavigationShell.of(context);
+      final currentIndex = shell.currentIndex;
+      
+      // If the user just switched to the Profile tab (index 3), trigger refresh
+      if (currentIndex == 3 && _lastIndex != 3) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            context.read<ProfileBloc>().add(ProfileLoadDetails());
+          }
+        });
+      }
+      _lastIndex = currentIndex;
+    } catch (_) {
+      // In case StatefulNavigationShell is not present in context (e.g. testing)
+    }
 
     return Scaffold(
       backgroundColor: AppPallete.background,
@@ -57,7 +83,6 @@ class ProfileView extends StatelessWidget {
               ),
             ProfileLoaded(
               profileDetails: final details,
-              isRefreshing: final isRefreshing,
             ) =>
                 LayoutBuilder(
               builder: (context, constraints) {
@@ -71,41 +96,45 @@ class ProfileView extends StatelessWidget {
                     const SizedBox(height: AppSpacing.stackLg),
                     ProfileBalanceCard(
                       credits: details.credits,
-                      isRefreshing: isRefreshing,
                     ),
+                    const SizedBox(height: AppSpacing.stackLg),
+                    if (!isWide) ...[
+                      ProfileMovementList(
+                        credits: details.credits,
+                        movements: details.movements,
+                      ),
                       const SizedBox(height: AppSpacing.stackLg),
-                      if (!isWide) ...[
-                        ProfileMovementList(
-                          credits: details.credits,
-                          movements: details.movements,
-                        ),
-                        const SizedBox(height: AppSpacing.stackLg),
-                      ],
-                      const ProfileMenuOptions(),
                     ],
-                  );
+                    const ProfileMenuOptions(),
+                  ],
+                );
 
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      final bloc = context.read<ProfileBloc>();
-                      bloc.add(ProfileLoadDetails());
-                      // Esperar a que termine de recargar (isRefreshing sea false) o falle
-                      await bloc.stream.firstWhere((state) {
-                        if (state is ProfileLoaded) {
-                          return !state.isRefreshing;
-                        }
-                        return true; // Detener en caso de error u otro estado
-                      });
-                    },
-                    color: AppPallete.primary,
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    final bloc = context.read<ProfileBloc>();
+                    bloc.add(ProfileLoadDetails());
+                    // Esperar a que termine de recargar (isRefreshing sea false) o falle
+                    await bloc.stream.firstWhere((state) {
+                      if (state is ProfileLoaded) {
+                        return !state.isRefreshing;
+                      }
+                      return true; // Detener en caso de error u otro estado
+                    });
+                  },
+                  color: AppPallete.primary,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.containerPadding,
                           vertical: AppSpacing.stackLg,
                         ),
-                        child: Center(
+                        child: Align(
+                          alignment: Alignment.topCenter,
                           child: Container(
                             constraints: const BoxConstraints(
                               maxWidth: AppSpacing.maxWidth,
@@ -133,9 +162,10 @@ class ProfileView extends StatelessWidget {
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
+            ),
             ProfileError(message: final msg) => BookingsListErrorView(
                 errorMessage: msg,
                 onRetry: () {

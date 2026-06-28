@@ -8,12 +8,10 @@ import 'package:velmar_ads/features/profile/presentation/bloc/profile_bloc.dart'
 
 class ProfileBalanceCard extends StatelessWidget {
   final double credits;
-  final bool isRefreshing;
 
   const ProfileBalanceCard({
     super.key,
     required this.credits,
-    this.isRefreshing = false,
   });
 
   @override
@@ -53,47 +51,13 @@ class ProfileBalanceCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'SALDO ACTUAL',
-                    style: AppTypography.labelMd.copyWith(
-                      color: AppPallete.secondary,
-                      letterSpacing: 1.5,
-                      fontSize: 11,
-                    ),
-                  ),
-                  isRefreshing
-                      ? const SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: Center(
-                            child: SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppPallete.primary,
-                              ),
-                            ),
-                          ),
-                        )
-                      : InkWell(
-                          onTap: () {
-                            context.read<ProfileBloc>().add(ProfileLoadDetails());
-                          },
-                          borderRadius: BorderRadius.circular(15),
-                          child: const Padding(
-                            padding: EdgeInsets.all(4),
-                            child: Icon(
-                              Icons.refresh,
-                              size: 22,
-                              color: AppPallete.primary,
-                            ),
-                          ),
-                        ),
-                ],
+              Text(
+                'SALDO ACTUAL',
+                style: AppTypography.labelMd.copyWith(
+                  color: AppPallete.secondary,
+                  letterSpacing: 1.5,
+                  fontSize: 11,
+                ),
               ),
               const SizedBox(height: AppSpacing.stackSm),
               Text(
