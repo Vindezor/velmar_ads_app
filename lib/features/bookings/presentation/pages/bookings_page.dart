@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:velmar_ads/core/common/widgets/velmar_app_bar.dart';
@@ -20,11 +21,36 @@ class BookingsPage extends StatelessWidget {
   }
 }
 
-class BookingsView extends StatelessWidget {
+class BookingsView extends StatefulWidget {
   const BookingsView({super.key});
 
   @override
+  State<BookingsView> createState() => _BookingsViewState();
+}
+
+class _BookingsViewState extends State<BookingsView> {
+  int? _lastIndex;
+
+  @override
   Widget build(BuildContext context) {
+    // Listen to StatefulNavigationShell index changes
+    try {
+      final shell = StatefulNavigationShell.of(context);
+      final currentIndex = shell.currentIndex;
+      
+      // If the user just switched to the Bookings tab (index 1), trigger refresh
+      if (currentIndex == 1 && _lastIndex != 1) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            context.read<BookingsBloc>().add(BookingsLoadUserBookings());
+          }
+        });
+      }
+      _lastIndex = currentIndex;
+    } catch (_) {
+      // In case StatefulNavigationShell is not present in context (e.g. testing)
+    }
+
     return Scaffold(
       backgroundColor: AppPallete.background,
       appBar: const VelmarAppBar(showBackButton: false),

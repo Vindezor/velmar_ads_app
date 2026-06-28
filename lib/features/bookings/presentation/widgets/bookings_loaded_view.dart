@@ -23,8 +23,12 @@ class BookingsLoadedView extends StatelessWidget {
         .toList();
     final approved =
         bookings.where((b) => b.status.toLowerCase() == 'approved').toList();
-    final rejected =
-        bookings.where((b) => b.status.toLowerCase() == 'rejected').toList();
+    final rejected = bookings
+        .where((b) =>
+            b.status.toLowerCase() == 'rejected' ||
+            b.status.toLowerCase() == 'expired' ||
+            b.status.toLowerCase() == 'cancelled')
+        .toList();
 
     return RefreshIndicator(
       onRefresh: onRefresh,
