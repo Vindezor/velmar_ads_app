@@ -54,9 +54,7 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppPallete.primaryContainer, // Cobalt Blue #0047AB
         foregroundColor: AppPallete.onPrimary,
-        minimumSize: const Size.fromHeight(
-          48,
-        ), // Desktop / Mobile standard height
+        minimumSize: const Size(88, 48), // Desktop / Mobile standard height with natural width
         shape: const RoundedRectangleBorder(
           borderRadius: AppRadius.borderMd, // 12px radius
         ),
@@ -73,7 +71,7 @@ class AppTheme {
         backgroundColor: Colors.transparent,
         foregroundColor: AppPallete.primaryContainer,
         side: const BorderSide(color: AppPallete.primaryContainer, width: 1),
-        minimumSize: const Size.fromHeight(48),
+        minimumSize: const Size(88, 48),
         shape: const RoundedRectangleBorder(
           borderRadius: AppRadius.borderMd, // 12px radius
         ),
