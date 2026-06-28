@@ -17,7 +17,7 @@ class BookingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final status = booking.status.toLowerCase();
-    final isRejected = status == 'rejected';
+    final isInactive = status == 'rejected' || status == 'expired' || status == 'cancelled';
     final isApproved = status == 'approved';
 
     // Status config mapping
@@ -31,11 +31,26 @@ class BookingCard extends StatelessWidget {
       badgeBgColor = AppPallete.primaryContainer;
       badgeTextColor = AppPallete.onPrimaryContainer;
       badgeText = 'Approved';
-    } else if (isRejected) {
+    } else if (status == 'rejected') {
       accentColor = AppPallete.error;
       badgeBgColor = AppPallete.errorContainer;
       badgeTextColor = AppPallete.error;
       badgeText = 'Rejected';
+    } else if (status == 'expired') {
+      accentColor = AppPallete.secondary;
+      badgeBgColor = AppPallete.outlineVariant.withValues(alpha: 0.2);
+      badgeTextColor = AppPallete.secondary;
+      badgeText = 'Expired';
+    } else if (status == 'cancelled') {
+      accentColor = AppPallete.secondary;
+      badgeBgColor = AppPallete.outlineVariant.withValues(alpha: 0.2);
+      badgeTextColor = AppPallete.secondary;
+      badgeText = 'Cancelled';
+    } else if (status == 'resubmitted') {
+      accentColor = AppPallete.tertiary;
+      badgeBgColor = AppPallete.tertiaryContainer.withValues(alpha: 0.15);
+      badgeTextColor = AppPallete.tertiary;
+      badgeText = 'Resubmitted';
     } else {
       // Pending
       accentColor = AppPallete.tertiary;
@@ -94,7 +109,7 @@ class BookingCard extends StatelessWidget {
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: booking.billboardImageUrl != null
-                        ? _buildImage(booking.billboardImageUrl!, isRejected)
+                        ? _buildImage(booking.billboardImageUrl!, isInactive)
                         : const Icon(
                             Icons.image_not_supported_outlined,
                             color: AppPallete.secondary,
@@ -178,7 +193,7 @@ class BookingCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              if (isRejected)
+                              if (isInactive)
                                 Text(
                                   formattedPrice,
                                   style: AppTypography.headlineMd.copyWith(
@@ -220,7 +235,7 @@ class BookingCard extends StatelessWidget {
       ),
     );
 
-    if (isRejected) {
+    if (isInactive) {
       cardContent = Opacity(
         opacity: 0.8,
         child: cardContent,
@@ -250,10 +265,12 @@ class BookingCard extends StatelessWidget {
 
     if (grayscale) {
       return ColorFiltered(
-        colorFilter: const ColorFilter.mode(
-          Colors.grey,
-          BlendMode.saturation,
-        ),
+        colorFilter: const ColorFilter.matrix(<double>[
+          0.2126, 0.7152, 0.0722, 0, 0,
+          0.2126, 0.7152, 0.0722, 0, 0,
+          0.2126, 0.7152, 0.0722, 0, 0,
+          0,      0,      0,      1, 0,
+        ]),
         child: imageWidget,
       );
     }
