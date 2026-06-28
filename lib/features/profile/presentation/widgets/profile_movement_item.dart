@@ -31,22 +31,23 @@ class ProfileMovementItem extends StatelessWidget {
     // Pick icon based on type / amount
     IconData iconData;
     Color iconColor;
+    Color iconBg;
 
     if (movement.type == 'credit_purchase') {
-      iconData = Icons.account_balance_wallet;
+      iconData = Icons.add_card;
+      iconBg = AppPallete.primary.withValues(alpha: 0.1);
       iconColor = AppPallete.primary;
     } else if (movement.type == 'booking_payment') {
       iconData = Icons.campaign;
+      iconBg = AppPallete.surfaceContainer;
       iconColor = AppPallete.secondary;
     } else if (movement.type == 'refund_rejection' || movement.type == 'refund_cancellation') {
-      iconData = Icons.receipt_long;
-      iconColor = AppPallete.primary;
-    } else if (isPositive) {
-      // Welcome gift or bonus
-      iconData = Icons.card_giftcard;
-      iconColor = AppPallete.primary;
+      iconData = Icons.currency_exchange;
+      iconBg = AppPallete.secondaryContainer;
+      iconColor = AppPallete.onSecondaryContainer;
     } else {
-      iconData = Icons.campaign;
+      iconData = Icons.receipt_long;
+      iconBg = AppPallete.surfaceContainer;
       iconColor = AppPallete.secondary;
     }
 
@@ -70,8 +71,8 @@ class ProfileMovementItem extends StatelessWidget {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: const BoxDecoration(
-                    color: AppPallete.surfaceContainer,
+                  decoration: BoxDecoration(
+                    color: iconBg,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

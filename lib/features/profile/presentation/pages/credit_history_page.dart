@@ -304,7 +304,7 @@ class _CreditHistoryPageState extends State<CreditHistoryPage> {
 
                           final formattedAmount = CurrencyFormatter.format(movement.amount.abs()).replaceAll('.00', '');
                           final amountText = isPositive ? '+$formattedAmount' : '-$formattedAmount';
-                          final amountColor = isPositive ? AppPallete.primary : AppPallete.onSurface;
+                          final amountColor = isPositive ? const Color(0xFF2E7D32) : AppPallete.onSurface;
 
                           final formattedBalanceAfter = CurrencyFormatter.format(movement.balanceAfter).replaceAll('.00', '');
 
