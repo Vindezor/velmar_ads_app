@@ -16,6 +16,8 @@ abstract interface class LibraryRemoteDataSource {
     required String userId,
     required String fileUrl,
     required String fileName,
+    required double fileSizeMb,
+    required String fileType,
   });
 
   Future<void> deleteCreativeAsset(String assetId);
@@ -61,13 +63,15 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
     required String userId,
     required String fileUrl,
     required String fileName,
+    required double fileSizeMb,
+    required String fileType,
   }) async {
     try {
       final response = await supabaseClient.from('creative_assets').insert({
         'user_id': userId,
         'file_url': fileUrl,
-        'file_type': 'image',
-        'file_size_mb': 0.0001,
+        'file_type': fileType,
+        'file_size_mb': fileSizeMb,
         'original_filename': fileName,
         'status': 'pending',
       }).select('id').single();

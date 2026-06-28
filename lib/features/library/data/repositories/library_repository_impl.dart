@@ -30,10 +30,17 @@ class LibraryRepositoryImpl implements LibraryRepository {
       );
       isUploaded = true;
 
+      final fileSizeMb = fileBytes.length / (1024 * 1024);
+      final lowerName = fileName.toLowerCase();
+      final isVideo = lowerName.endsWith('.mp4') || lowerName.endsWith('.mov') || lowerName.endsWith('.avi') || lowerName.endsWith('.m4v');
+      final fileType = isVideo ? 'video' : 'image';
+
       final assetId = await _remoteDataSource.createCreativeAsset(
         userId: userId,
         fileUrl: fileUrl,
         fileName: fileName,
+        fileSizeMb: fileSizeMb,
+        fileType: fileType,
       );
 
       return right(assetId);
