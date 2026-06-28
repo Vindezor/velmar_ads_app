@@ -1,35 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
+import 'package:velmar_ads/core/common/widgets/velmar_app_bar.dart';
+import 'package:velmar_ads/features/library/presentation/widgets/library_empty_view.dart';
 
 class LibraryPage extends StatelessWidget {
   const LibraryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: AppPallete.background,
-      appBar: AppBar(
-        backgroundColor: AppPallete.surfaceContainerLowest,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Library',
-          style: AppTypography.headlineMd.copyWith(
-            color: AppPallete.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Text(
-          'Library Section',
-          style: AppTypography.bodyLg.copyWith(
-            color: AppPallete.textSecondary,
-          ),
-        ),
-      ),
+      appBar: VelmarAppBar(showBackButton: false),
+      body: LibraryEmptyView(),
     );
   }
 }
