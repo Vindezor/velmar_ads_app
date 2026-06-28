@@ -307,96 +307,116 @@ class _RequestCreditsPageState extends State<RequestCreditsPage> {
                                           ),
                                         ),
                                         const SizedBox(height: 20),
-                                        // Dotted Dropzone
-                                        InkWell(
-                                          onTap: _pickImageFromGallery,
-                                          borderRadius: AppRadius.borderMd,
-                                          child: CustomPaint(
-                                            painter: DashedBorderPainter(
-                                              color: AppPallete.outlineVariant,
-                                              strokeWidth: 2,
-                                              dashWidth: 8,
-                                              dashGap: 6,
-                                              borderRadius: 12,
-                                            ),
-                                            child: Container(
-                                              width: double.infinity,
-                                              padding: const EdgeInsets.symmetric(
-                                                vertical: 36,
-                                                horizontal: 16,
+                                        if (_selectedFileName == null) ...[
+                                          // Dotted Dropzone
+                                          InkWell(
+                                            onTap: _pickImageFromGallery,
+                                            borderRadius: AppRadius.borderMd,
+                                            child: CustomPaint(
+                                              painter: DashedBorderPainter(
+                                                color: AppPallete.outlineVariant,
+                                                strokeWidth: 2,
+                                                dashWidth: 8,
+                                                dashGap: 6,
+                                                borderRadius: 12,
                                               ),
-                                              decoration: BoxDecoration(
-                                                color: AppPallete.surfaceContainerLow,
-                                                borderRadius: BorderRadius.circular(12),
-                                              ),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(
-                                                    Icons.cloud_upload_outlined,
-                                                    color: AppPallete.outline,
-                                                    size: 40,
-                                                  ),
-                                                  const SizedBox(height: 12),
-                                                  Text(
-                                                    'Haz clic para seleccionar comprobante',
-                                                    style: AppTypography.labelMd.copyWith(
-                                                      color: AppPallete.onSurface,
-                                                      fontWeight: FontWeight.bold,
+                                              child: Container(
+                                                width: double.infinity,
+                                                padding: const EdgeInsets.symmetric(
+                                                  vertical: 36,
+                                                  horizontal: 16,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: AppPallete.surfaceContainerLow,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.cloud_upload_outlined,
+                                                      color: AppPallete.outline,
+                                                      size: 40,
                                                     ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    'Tamaño máximo: 5MB',
-                                                    style: AppTypography.bodySm.copyWith(
-                                                      color: AppPallete.secondary,
+                                                    const SizedBox(height: 12),
+                                                    Text(
+                                                      'Haz clic para seleccionar comprobante',
+                                                      style: AppTypography.labelMd.copyWith(
+                                                        color: AppPallete.onSurface,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
                                                     ),
-                                                  ),
-                                                ],
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      'Tamaño máximo: 5MB',
+                                                      style: AppTypography.bodySm.copyWith(
+                                                        color: AppPallete.secondary,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                        // File Preview
-                                        if (_selectedFileName != null) ...[
-                                          const SizedBox(height: 16),
+                                        ] else ...[
+                                          // File Selected View (Replaces Dropzone)
                                           Container(
-                                            padding: const EdgeInsets.all(12),
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.all(AppSpacing.gutter),
                                             decoration: BoxDecoration(
                                               color: AppPallete.surfaceBright,
-                                              border: Border.all(color: AppPallete.outlineVariant),
-                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(color: AppPallete.primary.withValues(alpha: 0.3)),
+                                              borderRadius: BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: AppPallete.primary.withValues(alpha: 0.05),
+                                                  blurRadius: 10,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                              ],
                                             ),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            child: Column(
                                               children: [
-                                                Expanded(
-                                                  child: Row(
-                                                    children: [
-                                                      const Icon(
-                                                        Icons.description,
-                                                        color: AppPallete.primary,
-                                                        size: 24,
-                                                      ),
-                                                      const SizedBox(width: 12),
-                                                      Expanded(
-                                                        child: Text(
-                                                          _selectedFileName!,
-                                                          style: AppTypography.bodySm.copyWith(
-                                                            color: AppPallete.onSurface,
-                                                          ),
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ],
+                                                // Preview Icon and Status
+                                                const Icon(
+                                                  Icons.check_circle,
+                                                  color: Colors.green,
+                                                  size: 44,
+                                                ),
+                                                const SizedBox(height: 12),
+                                                Text(
+                                                  'Comprobante Cargado',
+                                                  style: AppTypography.bodyLg.copyWith(
+                                                    color: AppPallete.onSurface,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
-                                                IconButton(
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  _selectedFileName!,
+                                                  style: AppTypography.bodySm.copyWith(
+                                                    color: AppPallete.secondary,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 16),
+                                                // Action Button to Change or Delete
+                                                TextButton.icon(
                                                   onPressed: _removeFile,
-                                                  icon: const Icon(
-                                                    Icons.close,
-                                                    color: AppPallete.error,
-                                                    size: 20,
+                                                  icon: const Icon(Icons.delete_outline, size: 18),
+                                                  label: const Text('Eliminar y cambiar archivo'),
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor: AppPallete.error,
+                                                    backgroundColor: AppPallete.error.withValues(alpha: 0.05),
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 10,
+                                                    ),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
                                                   ),
                                                 ),
                                               ],
