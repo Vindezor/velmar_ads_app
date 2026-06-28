@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:velmar_ads/core/error/exceptions.dart';
+import 'package:velmar_ads/features/library/data/models/creative_asset_model.dart';
 
 abstract interface class LibraryRemoteDataSource {
   Future<String> uploadAdContent({
@@ -18,6 +19,8 @@ abstract interface class LibraryRemoteDataSource {
   });
 
   Future<void> deleteCreativeAsset(String assetId);
+
+  Future<List<CreativeAssetModel>> getUserAssets(String userId);
 }
 
 class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
@@ -78,6 +81,21 @@ class LibraryRemoteDataSourceImpl implements LibraryRemoteDataSource {
   Future<void> deleteCreativeAsset(String assetId) async {
     try {
       await supabaseClient.from('creative_assets').delete().eq('id', assetId);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<CreativeAssetModel>> getUserAssets(String userId) async {
+    try {
+      final response = await supabaseClient
+          .from('creative_assets')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', ascending: false);
+      final list = response as List<dynamic>;
+      return list.map((json) => CreativeAssetModel.fromJson(json)).toList();
     } catch (e) {
       throw ServerException(e.toString());
     }

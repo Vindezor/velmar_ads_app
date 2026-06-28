@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/exceptions.dart';
 import 'package:velmar_ads/core/error/failures.dart';
 import 'package:velmar_ads/features/library/data/datasources/library_remote_data_source.dart';
+import 'package:velmar_ads/features/library/domain/entities/creative_asset.dart';
 import 'package:velmar_ads/features/library/domain/repository/library_repository.dart';
 
 class LibraryRepositoryImpl implements LibraryRepository {
@@ -57,6 +58,16 @@ class LibraryRepositoryImpl implements LibraryRepository {
       final path = '$userId/$fileName';
       await _remoteDataSource.deleteAdContent(path);
       return right(null);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CreativeAsset>>> getUserAssets(String userId) async {
+    try {
+      final assets = await _remoteDataSource.getUserAssets(userId);
+      return right(assets);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }
