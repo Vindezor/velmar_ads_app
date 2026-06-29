@@ -27,12 +27,18 @@ class CreditRequestsPage extends StatelessWidget {
                 child: CircularProgressIndicator(color: AppPallete.primary),
               ),
             ProfileCreditRequestsLoaded(creditRequests: final requests) =>
-              CreditRequestsList(creditRequests: requests),
+              RefreshIndicator(
+                onRefresh: () async {
+                  context.read<ProfileBloc>().add(ProfileLoadCreditRequests(forceRefresh: true));
+                },
+                color: AppPallete.primary,
+                child: CreditRequestsList(creditRequests: requests),
+              ),
             ProfileCreditRequestsError(message: final msg) ||
             ProfileError(message: final msg) => CreditRequestsErrorView(
                 errorMessage: msg,
                 onRetry: () {
-                  context.read<ProfileBloc>().add(ProfileLoadCreditRequests());
+                  context.read<ProfileBloc>().add(ProfileLoadCreditRequests(forceRefresh: true));
                 },
               ),
           };

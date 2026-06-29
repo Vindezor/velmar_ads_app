@@ -10,6 +10,11 @@ import 'package:velmar_ads/features/library/domain/repository/library_repository
 class LibraryRepositoryImpl implements LibraryRepository {
   final LibraryRemoteDataSource _remoteDataSource;
 
+  List<CreativeAsset>? _cachedUserAssets;
+  String? _cachedUserId;
+  DateTime? _lastCacheTime;
+  static const _ttl = Duration(seconds: 60);
+
   LibraryRepositoryImpl({required LibraryRemoteDataSource remoteDataSource})
       : _remoteDataSource = remoteDataSource;
 
@@ -53,6 +58,9 @@ class LibraryRepositoryImpl implements LibraryRepository {
         fileType: fileType,
       );
 
+      _cachedUserAssets = null;
+      _cachedUserId = null;
+
       return right(assetId);
     } on ServerException catch (e) {
       if (isUploaded) {
@@ -74,6 +82,8 @@ class LibraryRepositoryImpl implements LibraryRepository {
       await _remoteDataSource.deleteCreativeAsset(assetId);
       final path = '$userId/$fileName';
       await _remoteDataSource.deleteAdContent(path);
+      _cachedUserAssets = null;
+      _cachedUserId = null;
       return right(null);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -81,9 +91,20 @@ class LibraryRepositoryImpl implements LibraryRepository {
   }
 
   @override
-  Future<Either<Failure, List<CreativeAsset>>> getUserAssets(String userId) async {
+  Future<Either<Failure, List<CreativeAsset>>> getUserAssets(String userId, {bool forceRefresh = false}) async {
+    if (!forceRefresh &&
+        _cachedUserId == userId &&
+        _cachedUserAssets != null &&
+        _lastCacheTime != null &&
+        DateTime.now().difference(_lastCacheTime!) < _ttl) {
+      return right(_cachedUserAssets!);
+    }
+
     try {
       final assets = await _remoteDataSource.getUserAssets(userId);
+      _cachedUserAssets = assets;
+      _cachedUserId = userId;
+      _lastCacheTime = DateTime.now();
       return right(assets);
     } on ServerException catch (e) {
       return left(Failure(e.message));

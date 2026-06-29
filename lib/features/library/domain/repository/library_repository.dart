@@ -15,5 +15,5 @@ abstract interface class LibraryRepository {
     required String userId,
   });
 
-  Future<Either<Failure, List<CreativeAsset>>> getUserAssets(String userId);
+  Future<Either<Failure, List<CreativeAsset>>> getUserAssets(String userId, {bool forceRefresh = false});
 }

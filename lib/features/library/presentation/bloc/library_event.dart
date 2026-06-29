@@ -31,5 +31,6 @@ final class LibraryReset extends LibraryEvent {}
 
 final class LibraryFetchAssets extends LibraryEvent {
   final String userId;
-  LibraryFetchAssets({required this.userId});
+  final bool forceRefresh;
+  LibraryFetchAssets({required this.userId, this.forceRefresh = false});
 }

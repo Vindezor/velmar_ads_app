@@ -5,7 +5,7 @@ import 'package:velmar_ads/features/profile/domain/entities/profile_details.dart
 import 'package:velmar_ads/features/profile/domain/entities/credit_request.dart';
 
 abstract interface class ProfileRepository {
-  Future<Either<Failure, ProfileDetails>> getProfileDetails(String userId);
+  Future<Either<Failure, ProfileDetails>> getProfileDetails(String userId, {bool forceRefresh = false});
   
   Future<Either<Failure, void>> submitCreditRequest({
     required double amount,
@@ -15,6 +15,6 @@ abstract interface class ProfileRepository {
     String? paymentNotes,
   });
 
-  Future<Either<Failure, List<CreditRequest>>> getCreditRequests(String userId);
+  Future<Either<Failure, List<CreditRequest>>> getCreditRequests(String userId, {bool forceRefresh = false});
 }
 

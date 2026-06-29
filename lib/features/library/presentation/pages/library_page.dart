@@ -53,7 +53,7 @@ class _LibraryViewState extends State<LibraryView> {
       if (location == '/library' && _lastLocation != '/library') {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            context.read<LibraryBloc>().add(LibraryFetchAssets(userId: widget.userId));
+            context.read<LibraryBloc>().add(LibraryFetchAssets(userId: widget.userId, forceRefresh: false));
           }
         });
       }
@@ -76,7 +76,7 @@ class _LibraryViewState extends State<LibraryView> {
                 : LibraryLoadedView(
                     assets: assets,
                     onRefresh: () async {
-                      context.read<LibraryBloc>().add(LibraryFetchAssets(userId: widget.userId));
+                      context.read<LibraryBloc>().add(LibraryFetchAssets(userId: widget.userId, forceRefresh: true));
                     },
                   ),
             LibraryAssetsError(message: final msg) => Center(
@@ -95,7 +95,7 @@ class _LibraryViewState extends State<LibraryView> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
-                          context.read<LibraryBloc>().add(LibraryFetchAssets(userId: widget.userId));
+                          context.read<LibraryBloc>().add(LibraryFetchAssets(userId: widget.userId, forceRefresh: true));
                         },
                         child: const Text('Reintentar'),
                       ),

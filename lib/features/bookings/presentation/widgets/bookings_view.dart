@@ -28,7 +28,7 @@ class _BookingsViewState extends State<BookingsView> {
       if (location == '/bookings' && _lastLocation != '/bookings') {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            context.read<BookingsBloc>().add(BookingsLoadUserBookings());
+            context.read<BookingsBloc>().add(BookingsLoadUserBookings(forceRefresh: false));
           }
         });
       }
@@ -51,13 +51,13 @@ class _BookingsViewState extends State<BookingsView> {
                 : BookingsLoadedView(
                     bookings: bookings,
                     onRefresh: () async {
-                      context.read<BookingsBloc>().add(BookingsLoadUserBookings());
+                      context.read<BookingsBloc>().add(BookingsLoadUserBookings(forceRefresh: true));
                     },
                   ),
             BookingsUserBookingsError(message: final msg) => BookingsListErrorView(
                 errorMessage: msg,
                 onRetry: () {
-                  context.read<BookingsBloc>().add(BookingsLoadUserBookings());
+                  context.read<BookingsBloc>().add(BookingsLoadUserBookings(forceRefresh: true));
                 },
               ),
             _ => const Center(

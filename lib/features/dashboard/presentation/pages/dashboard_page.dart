@@ -26,9 +26,9 @@ class _DashboardPageState extends State<DashboardPage> {
     _loadData();
   }
 
-  void _loadData() {
+  void _loadData({bool forceRefresh = false}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _dashboardBloc.add(DashboardFetchData());
+      _dashboardBloc.add(DashboardFetchData(forceRefresh: forceRefresh));
     });
   }
 
@@ -42,7 +42,7 @@ class _DashboardPageState extends State<DashboardPage> {
       if (location == '/dashboard' && _lastLocation != '/dashboard') {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            _dashboardBloc.add(DashboardFetchData());
+            _dashboardBloc.add(DashboardFetchData(forceRefresh: false));
           }
         });
       }
@@ -60,11 +60,11 @@ class _DashboardPageState extends State<DashboardPage> {
             DashboardInitial() || DashboardLoading() => const Center(child: Loader()),
             DashboardError(:final message) => DashboardErrorView(
                 message: message,
-                onRetry: _loadData,
+                onRetry: () => _loadData(forceRefresh: true),
               ),
             DashboardLoaded(:final data) => DashboardLoadedView(
                 data: data,
-                onRefresh: () async => _loadData(),
+                onRefresh: () async => _loadData(forceRefresh: true),
                 onBillboardTap: (billboard) {
                   context.pushNamed(
                     'billboard-detail',

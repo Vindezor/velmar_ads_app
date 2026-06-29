@@ -87,7 +87,7 @@ void _initDashboard() {
     ..registerFactory<DashboardRemoteDataSource>(
       () => DashboardRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerFactory<DashboardRepository>(
+    ..registerLazySingleton<DashboardRepository>(
       () => DashboardRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => GetDashboardData(repository: serviceLocator()))
@@ -104,7 +104,7 @@ void _initBookings() {
     ..registerFactory<BookingsRemoteDataSource>(
       () => BookingsRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerFactory<BookingsRepository>(
+    ..registerLazySingleton<BookingsRepository>(
       () => BookingsRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => GetBillboardBookings(bookingsRepository: serviceLocator()))
@@ -137,7 +137,7 @@ void _initLibrary() {
     ..registerFactory<LibraryRemoteDataSource>(
       () => LibraryRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerFactory<LibraryRepository>(
+    ..registerLazySingleton<LibraryRepository>(
       () => LibraryRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => UploadAdAsset(repository: serviceLocator()))
@@ -157,7 +157,7 @@ void _initProfile() {
     ..registerFactory<ProfileRemoteDataSource>(
       () => ProfileRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerFactory<ProfileRepository>(
+    ..registerLazySingleton<ProfileRepository>(
       () => ProfileRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => GetProfileDetails(profileRepository: serviceLocator()))

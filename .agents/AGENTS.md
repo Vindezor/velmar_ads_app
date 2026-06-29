@@ -61,6 +61,13 @@ Este proyecto utiliza **Clean Architecture** (Arquitectura Limpia) con **Flutter
     *   Si un Bloc o Cubit de una funcionalidad específica (ej. `DashboardBloc`) necesita consultar la sesión o la información del usuario logueado, inyecta `AppUserCubit` en su constructor.
     *   Los eventos de carga de la UI no deben arrastrar parámetros que ya están disponibles en los estados globales (como el `userId`), delegando esa obtención de forma interna al Bloc mediante el Cubit inyectado.
 
+8.  **Estrategia de Caché en Repositorios y Refresco Silencioso (Caché con TTL + Background Refresh)**:
+    *   Los repositorios deben registrarse como singletons (`registerLazySingleton`) en [init_dependencies.dart](file:///d:/AMD/Escritorio/Velmar_Ads/Code/Flutter/velmar_ads/lib/init_dependencies.dart) para mantener la memoria caché viva.
+    *   Las consultas a la base de datos deben almacenarse en caché con un tiempo de vida (TTL) de 60 segundos, segmentadas por `userId`.
+    *   Los métodos de lectura en repositorios y sus correspondientes casos de uso deben aceptar un parámetro opcional `bool forceRefresh = false` para ignorar el caché cuando se requiera (como en pull-to-refresh).
+    *   Las operaciones de escritura (ej: crear reservas, subir assets, solicitar créditos) deben invalidar de forma inmediata el caché local correspondiente en el repositorio.
+    *   En los Blocs, para evitar la sobrecarga visual de cargando (pantallas con spinners de pantalla completa), solo se debe emitir el estado de `Loading` cuando no existan datos cargados previamente. Si los datos ya se encuentran en estado de éxito, la recarga se realiza en segundo plano (*background refresh*) y se actualizan silenciosamente de forma fluida.
+
 ---
 
 ## 💬 Estilo de Comunicación y Entregas

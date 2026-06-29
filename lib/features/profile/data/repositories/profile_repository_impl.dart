@@ -13,12 +13,30 @@ import 'package:velmar_ads/features/profile/domain/repository/profile_repository
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource _remoteDataSource;
 
-  const ProfileRepositoryImpl({
+  ProfileDetails? _cachedProfileDetails;
+  String? _cachedProfileUserId;
+  DateTime? _lastProfileCacheTime;
+
+  List<CreditRequest>? _cachedCreditRequests;
+  String? _cachedCreditUserId;
+  DateTime? _lastCreditCacheTime;
+
+  static const _ttl = Duration(seconds: 60);
+
+  ProfileRepositoryImpl({
     required ProfileRemoteDataSource remoteDataSource,
   }) : _remoteDataSource = remoteDataSource;
 
   @override
-  Future<Either<Failure, ProfileDetails>> getProfileDetails(String userId) async {
+  Future<Either<Failure, ProfileDetails>> getProfileDetails(String userId, {bool forceRefresh = false}) async {
+    if (!forceRefresh &&
+        _cachedProfileUserId == userId &&
+        _cachedProfileDetails != null &&
+        _lastProfileCacheTime != null &&
+        DateTime.now().difference(_lastProfileCacheTime!) < _ttl) {
+      return right(_cachedProfileDetails!);
+    }
+
     try {
       final futures = await Future.wait([
         _remoteDataSource.getUserCredits(userId),
@@ -28,12 +46,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final credits = futures[0] as double;
       final movements = futures[1] as List<dynamic>;
 
-      return right(
-        ProfileDetails(
-          credits: credits,
-          movements: movements.cast(),
-        ),
+      final details = ProfileDetails(
+        credits: credits,
+        movements: movements.cast(),
       );
+
+      _cachedProfileDetails = details;
+      _cachedProfileUserId = userId;
+      _lastProfileCacheTime = DateTime.now();
+
+      return right(details);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }
@@ -78,6 +100,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       // 4. Submit to database
       await _remoteDataSource.createCreditRequest(request);
+
+      _cachedCreditRequests = null;
+      _cachedCreditUserId = null;
+      _cachedProfileDetails = null;
+      _cachedProfileUserId = null;
+
       return right(null);
     } on ServerException catch (e) {
       if (isUploaded) {
@@ -90,9 +118,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, List<CreditRequest>>> getCreditRequests(String userId) async {
+  Future<Either<Failure, List<CreditRequest>>> getCreditRequests(String userId, {bool forceRefresh = false}) async {
+    if (!forceRefresh &&
+        _cachedCreditUserId == userId &&
+        _cachedCreditRequests != null &&
+        _lastCreditCacheTime != null &&
+        DateTime.now().difference(_lastCreditCacheTime!) < _ttl) {
+      return right(_cachedCreditRequests!);
+    }
+
     try {
       final requests = await _remoteDataSource.getCreditRequests(userId);
+      _cachedCreditRequests = requests;
+      _cachedCreditUserId = userId;
+      _lastCreditCacheTime = DateTime.now();
       return right(requests);
     } on ServerException catch (e) {
       return left(Failure(e.message));

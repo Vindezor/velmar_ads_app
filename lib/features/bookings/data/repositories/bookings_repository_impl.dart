@@ -10,6 +10,11 @@ import 'package:velmar_ads/features/bookings/domain/repository/bookings_reposito
 class BookingsRepositoryImpl implements BookingsRepository {
   final BookingsRemoteDataSource _remoteDataSource;
 
+  List<Booking>? _cachedUserBookings;
+  String? _cachedUserId;
+  DateTime? _lastCacheTime;
+  static const _ttl = Duration(seconds: 60);
+
   BookingsRepositoryImpl({required BookingsRemoteDataSource remoteDataSource})
       : _remoteDataSource = remoteDataSource;
 
@@ -81,6 +86,10 @@ class BookingsRepositoryImpl implements BookingsRepository {
         endTime: endTime,
         assetId: assetId,
       );
+      if (result['success'] == true) {
+        _cachedUserBookings = null;
+        _cachedUserId = null;
+      }
       return right(result);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -98,9 +107,20 @@ class BookingsRepositoryImpl implements BookingsRepository {
   }
 
   @override
-  Future<Either<Failure, List<Booking>>> getUserBookings(String userId) async {
+  Future<Either<Failure, List<Booking>>> getUserBookings(String userId, {bool forceRefresh = false}) async {
+    if (!forceRefresh &&
+        _cachedUserId == userId &&
+        _cachedUserBookings != null &&
+        _lastCacheTime != null &&
+        DateTime.now().difference(_lastCacheTime!) < _ttl) {
+      return right(_cachedUserBookings!);
+    }
+
     try {
       final bookings = await _remoteDataSource.getUserBookings(userId);
+      _cachedUserBookings = bookings;
+      _cachedUserId = userId;
+      _lastCacheTime = DateTime.now();
       return right(bookings);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -129,6 +149,8 @@ class BookingsRepositoryImpl implements BookingsRepository {
         assetId: assetId,
         notes: notes,
       );
+      _cachedUserBookings = null;
+      _cachedUserId = null;
       return right(null);
     } on ServerException catch (e) {
       return left(Failure(e.message));

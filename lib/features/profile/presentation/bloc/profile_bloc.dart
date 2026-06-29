@@ -55,7 +55,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       return;
     }
 
-    final result = await _getProfileDetails(userState.user.id);
+    final result = await _getProfileDetails(
+      GetProfileDetailsParams(
+        userId: userState.user.id,
+        forceRefresh: event.forceRefresh,
+      ),
+    );
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
       (details) => emit(ProfileLoaded(profileDetails: details, isRefreshing: false)),
@@ -101,7 +106,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileLoadCreditRequests event,
     Emitter<ProfileState> emit,
   ) async {
-    emit(ProfileCreditRequestsLoading());
+    if (state is! ProfileCreditRequestsLoaded) {
+      emit(ProfileCreditRequestsLoading());
+    }
 
     final userState = _appUserCubit.state;
     if (userState is! AppUserLoggedIn) {
@@ -109,7 +116,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       return;
     }
 
-    final result = await _getCreditRequests(userState.user.id);
+    final result = await _getCreditRequests(
+      GetCreditRequestsParams(
+        userId: userState.user.id,
+        forceRefresh: event.forceRefresh,
+      ),
+    );
     result.fold(
       (failure) => emit(ProfileCreditRequestsError(message: failure.message)),
       (requests) => emit(ProfileCreditRequestsLoaded(creditRequests: requests)),

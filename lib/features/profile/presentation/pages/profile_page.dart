@@ -55,7 +55,7 @@ class _ProfileViewState extends State<ProfileView> {
       if (location == '/profile' && _lastLocation != '/profile') {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            context.read<ProfileBloc>().add(ProfileLoadDetails());
+            context.read<ProfileBloc>().add(ProfileLoadDetails(forceRefresh: false));
           }
         });
       }
@@ -111,7 +111,7 @@ class _ProfileViewState extends State<ProfileView> {
                 return RefreshIndicator(
                   onRefresh: () async {
                     final bloc = context.read<ProfileBloc>();
-                    bloc.add(ProfileLoadDetails());
+                    bloc.add(ProfileLoadDetails(forceRefresh: true));
                     // Esperar a que termine de recargar (isRefreshing sea false) o falle
                     await bloc.stream.firstWhere((state) {
                       if (state is ProfileLoaded) {
@@ -168,7 +168,7 @@ class _ProfileViewState extends State<ProfileView> {
             ProfileError(message: final msg) => BookingsListErrorView(
                 errorMessage: msg,
                 onRetry: () {
-                  context.read<ProfileBloc>().add(ProfileLoadDetails());
+                  context.read<ProfileBloc>().add(ProfileLoadDetails(forceRefresh: true));
                 },
               ),
           };

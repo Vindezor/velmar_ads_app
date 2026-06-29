@@ -8,12 +8,26 @@ import 'package:velmar_ads/features/dashboard/domain/repository/dashboard_reposi
 class DashboardRepositoryImpl implements DashboardRepository {
   final DashboardRemoteDataSource remoteDataSource;
 
-  const DashboardRepositoryImpl({required this.remoteDataSource});
+  DashboardData? _cachedData;
+  String? _cachedUserId;
+  DateTime? _lastCacheTime;
+  static const _ttl = Duration(seconds: 60);
+
+  DashboardRepositoryImpl({required this.remoteDataSource});
 
   @override
   Future<Either<Failure, DashboardData>> getDashboardData({
     required String userId,
+    bool forceRefresh = false,
   }) async {
+    if (!forceRefresh &&
+        _cachedUserId == userId &&
+        _cachedData != null &&
+        _lastCacheTime != null &&
+        DateTime.now().difference(_lastCacheTime!) < _ttl) {
+      return right(_cachedData!);
+    }
+
     try {
       // Fetch billboards and balance in parallel for better performance
       final results = await Future.wait([
@@ -24,12 +38,16 @@ class DashboardRepositoryImpl implements DashboardRepository {
       final billboards = results[0] as List<dynamic>;
       final balance = results[1] as double;
 
-      return right(
-        DashboardData(
-          billboards: billboards.cast(),
-          userBalance: balance,
-        ),
+      final dashboardData = DashboardData(
+        billboards: billboards.cast(),
+        userBalance: balance,
       );
+
+      _cachedData = dashboardData;
+      _cachedUserId = userId;
+      _lastCacheTime = DateTime.now();
+
+      return right(dashboardData);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     } catch (e) {

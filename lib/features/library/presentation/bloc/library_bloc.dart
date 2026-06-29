@@ -73,8 +73,15 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
     LibraryFetchAssets event,
     Emitter<LibraryState> emit,
   ) async {
-    emit(LibraryAssetsLoading());
-    final result = await _getUserAssets(event.userId);
+    if (state is! LibraryAssetsLoaded) {
+      emit(LibraryAssetsLoading());
+    }
+    final result = await _getUserAssets(
+      GetUserAssetsParams(
+        userId: event.userId,
+        forceRefresh: event.forceRefresh,
+      ),
+    );
     result.fold(
       (failure) => emit(LibraryAssetsError(message: failure.message)),
       (assets) => emit(LibraryAssetsLoaded(assets: assets)),
