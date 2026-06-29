@@ -16,26 +16,25 @@ class BookingsView extends StatefulWidget {
 }
 
 class _BookingsViewState extends State<BookingsView> {
-  int? _lastIndex;
+  String? _lastLocation;
 
   @override
   Widget build(BuildContext context) {
-    // Listen to StatefulNavigationShell index changes
+    // Listen to GoRouterState matchedLocation changes
     try {
-      final shell = StatefulNavigationShell.of(context);
-      final currentIndex = shell.currentIndex;
+      final location = GoRouterState.of(context).matchedLocation;
       
-      // If the user just switched to the Bookings tab (index 1), trigger refresh
-      if (currentIndex == 1 && _lastIndex != 1) {
+      // If the user just switched to the Bookings tab (/bookings), trigger refresh
+      if (location == '/bookings' && _lastLocation != '/bookings') {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             context.read<BookingsBloc>().add(BookingsLoadUserBookings());
           }
         });
       }
-      _lastIndex = currentIndex;
+      _lastLocation = location;
     } catch (_) {
-      // In case StatefulNavigationShell is not present in context (e.g. testing)
+      // In case GoRouterState is not present in context (e.g. testing)
     }
 
     return Scaffold(

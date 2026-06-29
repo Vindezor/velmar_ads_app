@@ -32,7 +32,7 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  int? _lastIndex;
+  String? _lastLocation;
 
   @override
   Widget build(BuildContext context) {
@@ -47,22 +47,21 @@ class _ProfileViewState extends State<ProfileView> {
 
     final currentUser = userState.user;
 
-    // Listen to StatefulNavigationShell index changes
+    // Listen to GoRouterState matchedLocation changes
     try {
-      final shell = StatefulNavigationShell.of(context);
-      final currentIndex = shell.currentIndex;
+      final location = GoRouterState.of(context).matchedLocation;
       
-      // If the user just switched to the Profile tab (index 3), trigger refresh
-      if (currentIndex == 3 && _lastIndex != 3) {
+      // If the user just switched to the Profile tab (/profile), trigger refresh
+      if (location == '/profile' && _lastLocation != '/profile') {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             context.read<ProfileBloc>().add(ProfileLoadDetails());
           }
         });
       }
-      _lastIndex = currentIndex;
+      _lastLocation = location;
     } catch (_) {
-      // In case StatefulNavigationShell is not present in context (e.g. testing)
+      // In case GoRouterState is not present in context (e.g. testing)
     }
 
     return Scaffold(
