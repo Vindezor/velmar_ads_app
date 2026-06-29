@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_initializing_formals
 
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/exceptions.dart';
 import 'package:velmar_ads/core/error/failures.dart';
@@ -60,6 +61,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
       _cachedUserAssets = null;
       _cachedUserId = null;
+      _lastCacheTime = null;
+      
+      if (kDebugMode) {
+        print('📦 [CACHE] Asset subido. Invalidando cache de assets para $userId.');
+      }
 
       return right(assetId);
     } on ServerException catch (e) {
@@ -84,6 +90,11 @@ class LibraryRepositoryImpl implements LibraryRepository {
       await _remoteDataSource.deleteAdContent(path);
       _cachedUserAssets = null;
       _cachedUserId = null;
+      _lastCacheTime = null;
+      
+      if (kDebugMode) {
+        print('📦 [CACHE] Asset $assetId eliminado. Invalidando cache de assets.');
+      }
       return right(null);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -92,22 +103,56 @@ class LibraryRepositoryImpl implements LibraryRepository {
 
   @override
   Future<Either<Failure, List<CreativeAsset>>> getUserAssets(String userId, {bool forceRefresh = false}) async {
+    // If user changed, invalidate cache immediately
+    if (_cachedUserId != null && _cachedUserId != userId) {
+      if (kDebugMode) {
+        print('📦 [CACHE] Library user cambiado de $_cachedUserId a $userId. Invalidando cache.');
+      }
+      _cachedUserAssets = null;
+      _cachedUserId = null;
+      _lastCacheTime = null;
+    }
+
     if (!forceRefresh &&
         _cachedUserId == userId &&
         _cachedUserAssets != null &&
         _lastCacheTime != null &&
         DateTime.now().difference(_lastCacheTime!) < _ttl) {
+      if (kDebugMode) {
+        print('📦 [CACHE HIT] Assets para $userId');
+      }
       return right(_cachedUserAssets!);
     }
 
     try {
+      if (kDebugMode) {
+        print('📦 [CACHE MISS] Assets consultando Supabase para $userId (forceRefresh: $forceRefresh)');
+      }
       final assets = await _remoteDataSource.getUserAssets(userId);
       _cachedUserAssets = assets;
       _cachedUserId = userId;
       _lastCacheTime = DateTime.now();
+      
+      if (kDebugMode) {
+        print('📦 [CACHE UPDATE] Assets cache actualizado con ${assets.length} items para $userId');
+      }
       return right(assets);
     } on ServerException catch (e) {
+      if (_cachedUserId == userId && _cachedUserAssets != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale assets tras ServerException: ${e.message}');
+        }
+        return right(_cachedUserAssets!);
+      }
       return left(Failure(e.message));
+    } catch (e) {
+      if (_cachedUserId == userId && _cachedUserAssets != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale assets tras error inesperado: $e');
+        }
+        return right(_cachedUserAssets!);
+      }
+      return left(Failure(e.toString()));
     }
   }
 }

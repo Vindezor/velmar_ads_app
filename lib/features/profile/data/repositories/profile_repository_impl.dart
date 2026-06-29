@@ -1,6 +1,6 @@
 // ignore_for_file: prefer_initializing_formals
 
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/exceptions.dart';
 import 'package:velmar_ads/core/error/failures.dart';
@@ -21,7 +21,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   String? _cachedCreditUserId;
   DateTime? _lastCreditCacheTime;
 
-  static const _ttl = Duration(seconds: 60);
+  static const _ttl = Duration(minutes: 5);
 
   ProfileRepositoryImpl({
     required ProfileRemoteDataSource remoteDataSource,
@@ -29,15 +29,31 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<Either<Failure, ProfileDetails>> getProfileDetails(String userId, {bool forceRefresh = false}) async {
+    // If user changed, invalidate cache immediately
+    if (_cachedProfileUserId != null && _cachedProfileUserId != userId) {
+      if (kDebugMode) {
+        print('📦 [CACHE] Profile details user cambiado de $_cachedProfileUserId a $userId. Invalidando cache.');
+      }
+      _cachedProfileDetails = null;
+      _cachedProfileUserId = null;
+      _lastProfileCacheTime = null;
+    }
+
     if (!forceRefresh &&
         _cachedProfileUserId == userId &&
         _cachedProfileDetails != null &&
         _lastProfileCacheTime != null &&
         DateTime.now().difference(_lastProfileCacheTime!) < _ttl) {
+      if (kDebugMode) {
+        print('📦 [CACHE HIT] Profile details para $userId');
+      }
       return right(_cachedProfileDetails!);
     }
 
     try {
+      if (kDebugMode) {
+        print('📦 [CACHE MISS] Profile details consultando Supabase para $userId (forceRefresh: $forceRefresh)');
+      }
       final futures = await Future.wait([
         _remoteDataSource.getUserCredits(userId),
         _remoteDataSource.getMovementHistory(userId),
@@ -55,9 +71,27 @@ class ProfileRepositoryImpl implements ProfileRepository {
       _cachedProfileUserId = userId;
       _lastProfileCacheTime = DateTime.now();
 
+      if (kDebugMode) {
+        print('📦 [CACHE UPDATE] Profile details cache actualizado para $userId');
+      }
+
       return right(details);
     } on ServerException catch (e) {
+      if (_cachedProfileUserId == userId && _cachedProfileDetails != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale profile details tras ServerException: ${e.message}');
+        }
+        return right(_cachedProfileDetails!);
+      }
       return left(Failure(e.message));
+    } catch (e) {
+      if (_cachedProfileUserId == userId && _cachedProfileDetails != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale profile details tras error inesperado: $e');
+        }
+        return right(_cachedProfileDetails!);
+      }
+      return left(Failure(e.toString()));
     }
   }
 
@@ -103,8 +137,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
       _cachedCreditRequests = null;
       _cachedCreditUserId = null;
+      _lastCreditCacheTime = null;
       _cachedProfileDetails = null;
       _cachedProfileUserId = null;
+      _lastProfileCacheTime = null;
+
+      if (kDebugMode) {
+        print('📦 [CACHE] Solicitud de crédito enviada con éxito. Invalidando todos los caches de profile para $userId.');
+      }
 
       return right(null);
     } on ServerException catch (e) {
@@ -119,22 +159,57 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<Either<Failure, List<CreditRequest>>> getCreditRequests(String userId, {bool forceRefresh = false}) async {
+    // If user changed, invalidate cache immediately
+    if (_cachedCreditUserId != null && _cachedCreditUserId != userId) {
+      if (kDebugMode) {
+        print('📦 [CACHE] Profile credit requests user cambiado de $_cachedCreditUserId a $userId. Invalidando cache.');
+      }
+      _cachedCreditRequests = null;
+      _cachedCreditUserId = null;
+      _lastCreditCacheTime = null;
+    }
+
     if (!forceRefresh &&
         _cachedCreditUserId == userId &&
         _cachedCreditRequests != null &&
         _lastCreditCacheTime != null &&
         DateTime.now().difference(_lastCreditCacheTime!) < _ttl) {
+      if (kDebugMode) {
+        print('📦 [CACHE HIT] Profile credit requests para $userId');
+      }
       return right(_cachedCreditRequests!);
     }
 
     try {
+      if (kDebugMode) {
+        print('📦 [CACHE MISS] Profile credit requests consultando Supabase para $userId (forceRefresh: $forceRefresh)');
+      }
       final requests = await _remoteDataSource.getCreditRequests(userId);
       _cachedCreditRequests = requests;
       _cachedCreditUserId = userId;
       _lastCreditCacheTime = DateTime.now();
+
+      if (kDebugMode) {
+        print('📦 [CACHE UPDATE] Profile credit requests cache actualizado con ${requests.length} items para $userId');
+      }
+
       return right(requests);
     } on ServerException catch (e) {
+      if (_cachedCreditUserId == userId && _cachedCreditRequests != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale credit requests tras ServerException: ${e.message}');
+        }
+        return right(_cachedCreditRequests!);
+      }
       return left(Failure(e.message));
+    } catch (e) {
+      if (_cachedCreditUserId == userId && _cachedCreditRequests != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale credit requests tras error inesperado: $e');
+        }
+        return right(_cachedCreditRequests!);
+      }
+      return left(Failure(e.toString()));
     }
   }
 }

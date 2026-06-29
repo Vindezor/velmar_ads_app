@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/exceptions.dart';
 import 'package:velmar_ads/core/error/failures.dart';
@@ -11,7 +12,7 @@ class DashboardRepositoryImpl implements DashboardRepository {
   DashboardData? _cachedData;
   String? _cachedUserId;
   DateTime? _lastCacheTime;
-  static const _ttl = Duration(seconds: 60);
+  static const _ttl = Duration(seconds: 30);
 
   DashboardRepositoryImpl({required this.remoteDataSource});
 
@@ -20,15 +21,31 @@ class DashboardRepositoryImpl implements DashboardRepository {
     required String userId,
     bool forceRefresh = false,
   }) async {
+    // If user changed, invalidate cache immediately
+    if (_cachedUserId != null && _cachedUserId != userId) {
+      if (kDebugMode) {
+        print('📦 [CACHE] Dashboard user cambiado de $_cachedUserId a $userId. Invalidando cache.');
+      }
+      _cachedData = null;
+      _cachedUserId = null;
+      _lastCacheTime = null;
+    }
+
     if (!forceRefresh &&
         _cachedUserId == userId &&
         _cachedData != null &&
         _lastCacheTime != null &&
         DateTime.now().difference(_lastCacheTime!) < _ttl) {
+      if (kDebugMode) {
+        print('📦 [CACHE HIT] Dashboard data para $userId');
+      }
       return right(_cachedData!);
     }
 
     try {
+      if (kDebugMode) {
+        print('📦 [CACHE MISS] Dashboard data consultando Supabase para $userId (forceRefresh: $forceRefresh)');
+      }
       // Fetch billboards and balance in parallel for better performance
       final results = await Future.wait([
         remoteDataSource.getBillboards(),
@@ -47,10 +64,26 @@ class DashboardRepositoryImpl implements DashboardRepository {
       _cachedUserId = userId;
       _lastCacheTime = DateTime.now();
 
+      if (kDebugMode) {
+        print('📦 [CACHE UPDATE] Dashboard cache actualizado para $userId');
+      }
+
       return right(dashboardData);
     } on ServerException catch (e) {
+      if (_cachedUserId == userId && _cachedData != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale dashboard tras ServerException: ${e.message}');
+        }
+        return right(_cachedData!);
+      }
       return left(Failure(e.message));
     } catch (e) {
+      if (_cachedUserId == userId && _cachedData != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale dashboard tras error inesperado: $e');
+        }
+        return right(_cachedData!);
+      }
       return left(Failure(e.toString()));
     }
   }
