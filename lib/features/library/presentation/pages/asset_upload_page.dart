@@ -14,6 +14,7 @@ import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_dr
 import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_progress.dart';
 import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_preview.dart';
 import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_footer.dart';
+import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_approved_list.dart';
 
 enum UploadState { idle, uploading, completed }
 
@@ -41,6 +42,7 @@ class _AssetUploadPageState extends State<AssetUploadPage>
   String? _uploadedAssetId;
   String? _uploadedFileName;
   bool _isNavigatingToConfirmation = false;
+  int _activeTabIndex = 0;
 
   @override
   void initState() {
@@ -267,30 +269,63 @@ class _AssetUploadPageState extends State<AssetUploadPage>
                       clipBehavior: Clip.antiAlias,
                       child: Column(
                         children: [
-                          const AssetUploadTabs(),
+                          AssetUploadTabs(
+                            activeIndex: _activeTabIndex,
+                            onTabChanged: (index) {
+                              if (_activeTabIndex == index) return;
+                              setState(() {
+                                _activeTabIndex = index;
+                                _uploadedAssetId = null;
+                                _uploadedFileName = null;
+                                _state = UploadState.idle;
+                                _uploadProgress = 0.0;
+                              });
+                              context.read<LibraryBloc>().add(LibraryReset());
+
+                              if (index == 1) {
+                                final userState = context.read<AppUserCubit>().state;
+                                if (userState is AppUserLoggedIn) {
+                                  context.read<LibraryBloc>().add(
+                                    LibraryFetchAssets(userId: userState.user.id),
+                                  );
+                                }
+                              }
+                            },
+                          ),
                           Padding(
                             padding: const EdgeInsets.all(
                               AppSpacing.containerPadding,
                             ),
                             child: Column(
                               children: [
-                                if (_state == UploadState.idle)
-                                  AssetUploadDropzone(
-                                    onUploadTriggered: _startUpload,
+                                if (_activeTabIndex == 0) ...[
+                                  if (_state == UploadState.idle)
+                                    AssetUploadDropzone(
+                                      onUploadTriggered: _startUpload,
+                                    ),
+                                  if (_state == UploadState.uploading)
+                                    AssetUploadProgress(
+                                      progress: _uploadProgress,
+                                      onCancel: _cancelUpload,
+                                    ),
+                                  if (_state == UploadState.completed)
+                                    const AssetUploadPreview(),
+                                ] else
+                                  AssetUploadApprovedList(
+                                    selectedAssetId: _uploadedAssetId,
+                                    onAssetSelected: (asset) {
+                                      setState(() {
+                                        _uploadedAssetId = asset.id;
+                                      });
+                                    },
                                   ),
-                                if (_state == UploadState.uploading)
-                                  AssetUploadProgress(
-                                    progress: _uploadProgress,
-                                    onCancel: _cancelUpload,
-                                  ),
-                                if (_state == UploadState.completed)
-                                  const AssetUploadPreview(),
                               ],
                             ),
                           ),
                           AssetUploadFooter(
                             onCancel: _onCancelPressed,
-                            onConfirm: _state == UploadState.completed
+                            onConfirm: (_activeTabIndex == 0 && _state == UploadState.completed) ||
+                                    (_activeTabIndex == 1 && _uploadedAssetId != null)
                                 ? _onConfirmPressed
                                 : null,
                           ),
