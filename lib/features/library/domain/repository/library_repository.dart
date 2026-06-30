@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/failures.dart';
+import 'package:velmar_ads/features/library/domain/entities/creative_asset.dart';
 
 abstract interface class LibraryRepository {
   Future<Either<Failure, String>> uploadAdAsset({
@@ -13,4 +14,6 @@ abstract interface class LibraryRepository {
     required String fileName,
     required String userId,
   });
+
+  Future<Either<Failure, List<CreativeAsset>>> getUserAssets(String userId, {bool forceRefresh = false});
 }

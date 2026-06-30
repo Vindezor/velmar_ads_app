@@ -32,7 +32,7 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  int? _lastIndex;
+  String? _lastLocation;
 
   @override
   Widget build(BuildContext context) {
@@ -47,22 +47,21 @@ class _ProfileViewState extends State<ProfileView> {
 
     final currentUser = userState.user;
 
-    // Listen to StatefulNavigationShell index changes
+    // Listen to GoRouterState matchedLocation changes
     try {
-      final shell = StatefulNavigationShell.of(context);
-      final currentIndex = shell.currentIndex;
+      final location = GoRouterState.of(context).matchedLocation;
       
-      // If the user just switched to the Profile tab (index 3), trigger refresh
-      if (currentIndex == 3 && _lastIndex != 3) {
+      // If the user just switched to the Profile tab (/profile), trigger refresh
+      if (location == '/profile' && _lastLocation != '/profile') {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            context.read<ProfileBloc>().add(ProfileLoadDetails());
+            context.read<ProfileBloc>().add(ProfileLoadDetails(forceRefresh: false));
           }
         });
       }
-      _lastIndex = currentIndex;
+      _lastLocation = location;
     } catch (_) {
-      // In case StatefulNavigationShell is not present in context (e.g. testing)
+      // In case GoRouterState is not present in context (e.g. testing)
     }
 
     return Scaffold(
@@ -112,7 +111,7 @@ class _ProfileViewState extends State<ProfileView> {
                 return RefreshIndicator(
                   onRefresh: () async {
                     final bloc = context.read<ProfileBloc>();
-                    bloc.add(ProfileLoadDetails());
+                    bloc.add(ProfileLoadDetails(forceRefresh: true));
                     // Esperar a que termine de recargar (isRefreshing sea false) o falle
                     await bloc.stream.firstWhere((state) {
                       if (state is ProfileLoaded) {
@@ -169,7 +168,7 @@ class _ProfileViewState extends State<ProfileView> {
             ProfileError(message: final msg) => BookingsListErrorView(
                 errorMessage: msg,
                 onRetry: () {
-                  context.read<ProfileBloc>().add(ProfileLoadDetails());
+                  context.read<ProfileBloc>().add(ProfileLoadDetails(forceRefresh: true));
                 },
               ),
           };

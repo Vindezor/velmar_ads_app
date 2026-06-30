@@ -28,3 +28,9 @@ final class LibraryDeleteAsset extends LibraryEvent {
 }
 
 final class LibraryReset extends LibraryEvent {}
+
+final class LibraryFetchAssets extends LibraryEvent {
+  final String userId;
+  final bool forceRefresh;
+  LibraryFetchAssets({required this.userId, this.forceRefresh = false});
+}

@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_initializing_formals
 
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:velmar_ads/core/error/exceptions.dart';
 import 'package:velmar_ads/core/error/failures.dart';
@@ -9,6 +10,11 @@ import 'package:velmar_ads/features/bookings/domain/repository/bookings_reposito
 
 class BookingsRepositoryImpl implements BookingsRepository {
   final BookingsRemoteDataSource _remoteDataSource;
+
+  List<Booking>? _cachedUserBookings;
+  String? _cachedUserId;
+  DateTime? _lastCacheTime;
+  static const _ttl = Duration(seconds: 60);
 
   BookingsRepositoryImpl({required BookingsRemoteDataSource remoteDataSource})
       : _remoteDataSource = remoteDataSource;
@@ -81,6 +87,14 @@ class BookingsRepositoryImpl implements BookingsRepository {
         endTime: endTime,
         assetId: assetId,
       );
+      if (result['success'] == true) {
+        if (kDebugMode) {
+          print('📦 [CACHE] Booking creado con éxito. Invalidando cache de bookings para $userId.');
+        }
+        _cachedUserBookings = null;
+        _cachedUserId = null;
+        _lastCacheTime = null;
+      }
       return right(result);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -98,12 +112,57 @@ class BookingsRepositoryImpl implements BookingsRepository {
   }
 
   @override
-  Future<Either<Failure, List<Booking>>> getUserBookings(String userId) async {
+  Future<Either<Failure, List<Booking>>> getUserBookings(String userId, {bool forceRefresh = false}) async {
+    // If user changed, invalidate cache immediately
+    if (_cachedUserId != null && _cachedUserId != userId) {
+      if (kDebugMode) {
+        print('📦 [CACHE] Bookings user cambiado de $_cachedUserId a $userId. Invalidando cache.');
+      }
+      _cachedUserBookings = null;
+      _cachedUserId = null;
+      _lastCacheTime = null;
+    }
+
+    if (!forceRefresh &&
+        _cachedUserId == userId &&
+        _cachedUserBookings != null &&
+        _lastCacheTime != null &&
+        DateTime.now().difference(_lastCacheTime!) < _ttl) {
+      if (kDebugMode) {
+        print('📦 [CACHE HIT] Bookings para $userId');
+      }
+      return right(_cachedUserBookings!);
+    }
+
     try {
+      if (kDebugMode) {
+        print('📦 [CACHE MISS] Bookings consultando Supabase para $userId (forceRefresh: $forceRefresh)');
+      }
       final bookings = await _remoteDataSource.getUserBookings(userId);
+      _cachedUserBookings = bookings;
+      _cachedUserId = userId;
+      _lastCacheTime = DateTime.now();
+      
+      if (kDebugMode) {
+        print('📦 [CACHE UPDATE] Bookings cache actualizado con ${bookings.length} items para $userId');
+      }
       return right(bookings);
     } on ServerException catch (e) {
+      if (_cachedUserId == userId && _cachedUserBookings != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale bookings tras ServerException: ${e.message}');
+        }
+        return right(_cachedUserBookings!);
+      }
       return left(Failure(e.message));
+    } catch (e) {
+      if (_cachedUserId == userId && _cachedUserBookings != null) {
+        if (kDebugMode) {
+          print('📦 [CACHE STALE] Retornando stale bookings tras error inesperado: $e');
+        }
+        return right(_cachedUserBookings!);
+      }
+      return left(Failure(e.toString()));
     }
   }
 
@@ -129,6 +188,12 @@ class BookingsRepositoryImpl implements BookingsRepository {
         assetId: assetId,
         notes: notes,
       );
+      if (kDebugMode) {
+        print('📦 [CACHE] Reserva re-enviada. Invalidando cache de bookings.');
+      }
+      _cachedUserBookings = null;
+      _cachedUserId = null;
+      _lastCacheTime = null;
       return right(null);
     } on ServerException catch (e) {
       return left(Failure(e.message));

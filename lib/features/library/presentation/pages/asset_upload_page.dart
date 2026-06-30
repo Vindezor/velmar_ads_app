@@ -1,8 +1,7 @@
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/core/utils/show_snackbar.dart';
@@ -15,6 +14,7 @@ import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_dr
 import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_progress.dart';
 import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_preview.dart';
 import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_footer.dart';
+import 'package:velmar_ads/features/library/presentation/widgets/asset_upload_approved_list.dart';
 
 enum UploadState { idle, uploading, completed }
 
@@ -42,6 +42,7 @@ class _AssetUploadPageState extends State<AssetUploadPage>
   String? _uploadedAssetId;
   String? _uploadedFileName;
   bool _isNavigatingToConfirmation = false;
+  int _activeTabIndex = 0;
 
   @override
   void initState() {
@@ -83,29 +84,26 @@ class _AssetUploadPageState extends State<AssetUploadPage>
     }
     final userId = userState.user.id;
 
-    setState(() {
-      _state = UploadState.uploading;
-      _uploadProgress = 0.0;
-      _uploadedAssetId = null;
-      _uploadedFileName = null;
-    });
-
-    _uploadController.forward(from: 0.0);
-
     try {
-      const url = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDY0w3KW2MBy0AEYCjjQn92MQVdy-tETVgM-QMKfdGbpJLYz2QSCfnO4jx71zptYuQlyj-hWmg2Y92DP4LDVH_capKE6qMu0iodkV4WogjUeb02ryVaVIHjQjQ_VCgrvM972XpgbjHYOcmXTxPQfG6IMAM2ma36oZJuOSp3b0MgnKZxgfy0faZpfKKMy0kRuthlfFnNsZ45dQwzlXX-FPaW0mlLEIFLV6DBBXT8AwlOckA78ltbhH4fY7vazPr-GBcAtbY64FrDNJk';
-      final client = HttpClient();
-      final request = await client.getUrl(Uri.parse(url));
-      final response = await request.close();
+      final picker = ImagePicker();
+      // Pick either image or video from gallery
+      final XFile? mediaFile = await picker.pickMedia();
 
-      final bytesBuilder = BytesBuilder();
-      await for (final chunk in response) {
-        bytesBuilder.add(chunk);
+      if (mediaFile == null) {
+        return;
       }
-      final fileBytes = bytesBuilder.takeBytes();
 
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final fileName = 'campaign_summer_2024_$timestamp.png';
+      setState(() {
+        _state = UploadState.uploading;
+        _uploadProgress = 0.0;
+        _uploadedAssetId = null;
+        _uploadedFileName = null;
+      });
+
+      _uploadController.forward(from: 0.0);
+
+      final fileBytes = await mediaFile.readAsBytes();
+      final fileName = mediaFile.name; // Keep the original file name!
 
       if (!mounted) return;
 
@@ -122,7 +120,7 @@ class _AssetUploadPageState extends State<AssetUploadPage>
           );
     } catch (e) {
       if (!mounted) return;
-      showSnackBar(context: context, message: 'Error al procesar la imagen de prueba: $e');
+      showSnackBar(context: context, message: 'Error al seleccionar archivo: $e');
       _cancelUpload();
     }
   }
@@ -271,30 +269,63 @@ class _AssetUploadPageState extends State<AssetUploadPage>
                       clipBehavior: Clip.antiAlias,
                       child: Column(
                         children: [
-                          const AssetUploadTabs(),
+                          AssetUploadTabs(
+                            activeIndex: _activeTabIndex,
+                            onTabChanged: (index) {
+                              if (_activeTabIndex == index) return;
+                              setState(() {
+                                _activeTabIndex = index;
+                                _uploadedAssetId = null;
+                                _uploadedFileName = null;
+                                _state = UploadState.idle;
+                                _uploadProgress = 0.0;
+                              });
+                              context.read<LibraryBloc>().add(LibraryReset());
+
+                              if (index == 1) {
+                                final userState = context.read<AppUserCubit>().state;
+                                if (userState is AppUserLoggedIn) {
+                                  context.read<LibraryBloc>().add(
+                                    LibraryFetchAssets(userId: userState.user.id),
+                                  );
+                                }
+                              }
+                            },
+                          ),
                           Padding(
                             padding: const EdgeInsets.all(
                               AppSpacing.containerPadding,
                             ),
                             child: Column(
                               children: [
-                                if (_state == UploadState.idle)
-                                  AssetUploadDropzone(
-                                    onUploadTriggered: _startUpload,
+                                if (_activeTabIndex == 0) ...[
+                                  if (_state == UploadState.idle)
+                                    AssetUploadDropzone(
+                                      onUploadTriggered: _startUpload,
+                                    ),
+                                  if (_state == UploadState.uploading)
+                                    AssetUploadProgress(
+                                      progress: _uploadProgress,
+                                      onCancel: _cancelUpload,
+                                    ),
+                                  if (_state == UploadState.completed)
+                                    const AssetUploadPreview(),
+                                ] else
+                                  AssetUploadApprovedList(
+                                    selectedAssetId: _uploadedAssetId,
+                                    onAssetSelected: (asset) {
+                                      setState(() {
+                                        _uploadedAssetId = asset.id;
+                                      });
+                                    },
                                   ),
-                                if (_state == UploadState.uploading)
-                                  AssetUploadProgress(
-                                    progress: _uploadProgress,
-                                    onCancel: _cancelUpload,
-                                  ),
-                                if (_state == UploadState.completed)
-                                  const AssetUploadPreview(),
                               ],
                             ),
                           ),
                           AssetUploadFooter(
                             onCancel: _onCancelPressed,
-                            onConfirm: _state == UploadState.completed
+                            onConfirm: (_activeTabIndex == 0 && _state == UploadState.completed) ||
+                                    (_activeTabIndex == 1 && _uploadedAssetId != null)
                                 ? _onConfirmPressed
                                 : null,
                           ),

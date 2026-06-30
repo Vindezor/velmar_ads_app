@@ -17,6 +17,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late final DashboardBloc _dashboardBloc;
+  String? _lastLocation;
 
   @override
   void initState() {
@@ -25,14 +26,31 @@ class _DashboardPageState extends State<DashboardPage> {
     _loadData();
   }
 
-  void _loadData() {
+  void _loadData({bool forceRefresh = false}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _dashboardBloc.add(DashboardFetchData());
+      _dashboardBloc.add(DashboardFetchData(forceRefresh: forceRefresh));
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Listen to GoRouterState matchedLocation changes
+    try {
+      final location = GoRouterState.of(context).matchedLocation;
+      
+      // If the user just switched to the Dashboard tab (/dashboard), trigger refresh
+      if (location == '/dashboard' && _lastLocation != '/dashboard') {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _dashboardBloc.add(DashboardFetchData(forceRefresh: false));
+          }
+        });
+      }
+      _lastLocation = location;
+    } catch (_) {
+      // In case GoRouterState is not present in context (e.g. testing)
+    }
+
     return Scaffold(
       backgroundColor: AppPallete.background,
       appBar: const VelmarAppBar(showBackButton: false),
@@ -42,11 +60,11 @@ class _DashboardPageState extends State<DashboardPage> {
             DashboardInitial() || DashboardLoading() => const Center(child: Loader()),
             DashboardError(:final message) => DashboardErrorView(
                 message: message,
-                onRetry: _loadData,
+                onRetry: () => _loadData(forceRefresh: true),
               ),
             DashboardLoaded(:final data) => DashboardLoadedView(
                 data: data,
-                onRefresh: () async => _loadData(),
+                onRefresh: () async => _loadData(forceRefresh: true),
                 onBillboardTap: (billboard) {
                   context.pushNamed(
                     'billboard-detail',
