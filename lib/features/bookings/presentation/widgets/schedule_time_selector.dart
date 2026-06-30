@@ -52,20 +52,31 @@ class ScheduleTimeSelector extends StatelessWidget {
       }
     }
 
-    // Generar lista de horas de fin válidas (debe ser mayor que startHour)
+    // Generar lista de horas de fin válidas
     final List<int> availableEndHours = [];
-    if (startHour != null) {
-      for (int h = startHour! + 1; h <= 24; h++) {
+    final bool isMultiday = startDate != null && endDate != null &&
+        (startDate!.year != endDate!.year ||
+         startDate!.month != endDate!.month ||
+         startDate!.day != endDate!.day);
+
+    if (isMultiday) {
+      // Si son días distintos, se permiten las 24 horas de fin de forma libre
+      for (int h = 1; h <= 24; h++) {
         availableEndHours.add(h);
+      }
+    } else {
+      // Mismo día (o fin aún no seleccionado): la hora de fin debe ser posterior a la de inicio
+      if (startHour != null) {
+        for (int h = startHour! + 1; h <= 24; h++) {
+          availableEndHours.add(h);
+        }
       }
     }
 
     // Estilo de decoración para los dropdowns
-    InputDecoration dropdownDecoration({required String labelText, String? helperText}) {
+    InputDecoration dropdownDecoration({required String labelText}) {
       return InputDecoration(
         labelText: labelText,
-        helperText: helperText,
-        helperStyle: AppTypography.bodySm.copyWith(color: AppPallete.secondary),
         labelStyle: AppTypography.labelMd.copyWith(color: AppPallete.secondary),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         filled: true,
@@ -154,20 +165,15 @@ class ScheduleTimeSelector extends StatelessWidget {
                   ),
                 ),
               )
-            else
+            else ...[
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Dropdown de Hora de Inicio
                   Expanded(
                     child: DropdownButtonFormField<int>(
                       decoration: dropdownDecoration(
                         labelText: 'HORA DE INICIO',
-                        helperText: startDate != null &&
-                                startDate!.year == now.year &&
-                                startDate!.month == now.month &&
-                                startDate!.day == now.day
-                            ? 'Min. ${_formatHourLabel(minStartHour)} (Regla 2h)'
-                            : null,
                       ),
                       initialValue: startHour != null && availableStartHours.contains(startHour)
                           ? startHour
@@ -213,7 +219,7 @@ class ScheduleTimeSelector extends StatelessWidget {
                         color: AppPallete.onSurface,
                         fontWeight: FontWeight.w500,
                       ),
-                      items: startHour == null
+                      items: !isMultiday && startHour == null
                           ? null
                           : availableEndHours.map((hour) {
                               return DropdownMenuItem<int>(
@@ -221,11 +227,26 @@ class ScheduleTimeSelector extends StatelessWidget {
                                 child: Text(_formatHourLabel(hour)),
                               );
                             }).toList(),
-                      onChanged: startHour == null ? null : onEndHourChanged,
+                      onChanged: !isMultiday && startHour == null ? null : onEndHourChanged,
                     ),
                   ),
                 ],
               ),
+              if (startDate != null &&
+                  startDate!.year == now.year &&
+                  startDate!.month == now.month &&
+                  startDate!.day == now.day)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Text(
+                    '* Nota de reserva: Como inicia el día de hoy, la hora de inicio permitida debe ser al menos 2 horas después de la hora actual (${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}).',
+                    style: AppTypography.bodySm.copyWith(
+                      color: AppPallete.secondary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+            ],
           ],
         ),
       ),
