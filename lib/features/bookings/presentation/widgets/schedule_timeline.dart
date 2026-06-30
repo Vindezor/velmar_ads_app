@@ -25,7 +25,7 @@ class ScheduleTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hours = List.generate(10, (index) => index + 8);
+    final hours = List.generate(24, (index) => index);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
@@ -49,13 +49,18 @@ class ScheduleTimeline extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Horarios - $dateLabel',
-                  style: AppTypography.headlineMd.copyWith(
-                    color: AppPallete.onSurface,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    'Horarios - $dateLabel',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.headlineMd.copyWith(
+                      color: AppPallete.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   'Zona Centro',
                   style: AppTypography.labelMd.copyWith(

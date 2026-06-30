@@ -31,8 +31,8 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
   @override
   void initState() {
     super.initState();
-    _startDate = DateTime.now();
-    _endDate = DateTime.now();
+    _startDate = null;
+    _endDate = null;
   }
 
   void _onRangeChanged(DateTime start, DateTime? end) {
@@ -173,6 +173,29 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                         heightM: b.heightM,
                       ),
                       const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '1. Selecciona el rango de fechas',
+                              style: AppTypography.titleMd.copyWith(
+                                color: AppPallete.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Haz clic en el día de inicio y luego en el día de fin de tu campaña. Si es de un solo día, haz clic dos veces en el mismo día.',
+                              style: AppTypography.bodySm.copyWith(
+                                color: AppPallete.secondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       ScheduleCalendar(
                         startDate: _startDate,
                         endDate: _endDate,
@@ -180,6 +203,29 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                         bookings: bookings,
                       ),
                       const SizedBox(height: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.containerPadding),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '2. Selecciona el rango de horas',
+                              style: AppTypography.titleMd.copyWith(
+                                color: AppPallete.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Selecciona la hora de inicio y la hora de fin en el timeline. El intervalo intermedio se autocompletará.',
+                              style: AppTypography.bodySm.copyWith(
+                                color: AppPallete.secondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       ScheduleTimeline(
                         selectedSlots: _selectedSlots,
                         onSlotToggled: _onSlotToggled,
