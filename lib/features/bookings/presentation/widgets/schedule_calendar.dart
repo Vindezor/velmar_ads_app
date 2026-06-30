@@ -13,14 +13,16 @@ class CalendarDayData {
 }
 
 class ScheduleCalendar extends StatefulWidget {
-  final DateTime selectedDate;
-  final ValueChanged<DateTime> onDateChanged;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final Function(DateTime startDate, DateTime? endDate) onRangeChanged;
   final List<Booking> bookings;
 
   const ScheduleCalendar({
     super.key,
-    required this.selectedDate,
-    required this.onDateChanged,
+    required this.startDate,
+    required this.endDate,
+    required this.onRangeChanged,
     required this.bookings,
   });
 
@@ -34,14 +36,30 @@ class _ScheduleCalendarState extends State<ScheduleCalendar> {
   @override
   void initState() {
     super.initState();
-    _focusedMonth = DateTime(widget.selectedDate.year, widget.selectedDate.month, 1);
+    final initialDate = widget.startDate ?? DateTime.now();
+    _focusedMonth = DateTime(initialDate.year, initialDate.month, 1);
   }
 
   @override
   void didUpdateWidget(covariant ScheduleCalendar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedDate != widget.selectedDate) {
-      _focusedMonth = DateTime(widget.selectedDate.year, widget.selectedDate.month, 1);
+    if (oldWidget.startDate != widget.startDate && widget.startDate != null) {
+      _focusedMonth = DateTime(widget.startDate!.year, widget.startDate!.month, 1);
+    }
+  }
+
+  void _handleDayTap(DateTime clickedDate) {
+    final start = widget.startDate;
+    final end = widget.endDate;
+
+    if (start == null || end != null) {
+      widget.onRangeChanged(clickedDate, null);
+    } else {
+      if (clickedDate.isBefore(start)) {
+        widget.onRangeChanged(clickedDate, null);
+      } else {
+        widget.onRangeChanged(start, clickedDate);
+      }
     }
   }
 
@@ -187,9 +205,19 @@ class _ScheduleCalendarState extends State<ScheduleCalendar> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: week.map((dayData) {
                       final isInactive = !dayData.isCurrentMonth || dayData.date.isBefore(todayStart);
-                      final isSelected = widget.selectedDate.year == dayData.date.year &&
-                                         widget.selectedDate.month == dayData.date.month &&
-                                         widget.selectedDate.day == dayData.date.day;
+
+                      final dateToCompare = DateTime(dayData.date.year, dayData.date.month, dayData.date.day);
+                      final startToCompare = widget.startDate != null 
+                          ? DateTime(widget.startDate!.year, widget.startDate!.month, widget.startDate!.day)
+                          : null;
+                      final endToCompare = widget.endDate != null 
+                          ? DateTime(widget.endDate!.year, widget.endDate!.month, widget.endDate!.day)
+                          : null;
+
+                      final isStart = startToCompare != null && dateToCompare.isAtSameMomentAs(startToCompare);
+                      final isEnd = endToCompare != null && dateToCompare.isAtSameMomentAs(endToCompare);
+                      final isInRange = startToCompare != null && endToCompare != null &&
+                          dateToCompare.isAfter(startToCompare) && dateToCompare.isBefore(endToCompare);
 
                       final hasBookings = widget.bookings.any((booking) {
                         final dayStart = DateTime(dayData.date.year, dayData.date.month, dayData.date.day, 0, 0, 0);
@@ -200,9 +228,12 @@ class _ScheduleCalendarState extends State<ScheduleCalendar> {
                       return CalendarDaySquare(
                         day: dayData.date.day,
                         isInactive: isInactive,
-                        isSelected: isSelected,
+                        isSelected: isStart || isEnd || isInRange,
+                        isStart: isStart,
+                        isEnd: isEnd,
+                        isInRange: isInRange,
                         isOccupied: !isInactive && hasBookings,
-                        onTap: () => widget.onDateChanged(dayData.date),
+                        onTap: () => _handleDayTap(dayData.date),
                       );
                     }).toList(),
                   ),
@@ -254,6 +285,9 @@ class CalendarDaySquare extends StatelessWidget {
   final int? day;
   final bool isInactive;
   final bool isSelected;
+  final bool isStart;
+  final bool isEnd;
+  final bool isInRange;
   final bool isOccupied;
   final VoidCallback? onTap;
 
@@ -262,6 +296,9 @@ class CalendarDaySquare extends StatelessWidget {
     this.day,
     this.isInactive = false,
     this.isSelected = false,
+    this.isStart = false,
+    this.isEnd = false,
+    this.isInRange = false,
     this.isOccupied = false,
     this.onTap,
   });
@@ -276,14 +313,32 @@ class CalendarDaySquare extends StatelessWidget {
     Color textColor = AppPallete.onSurface;
     BoxBorder? border;
     FontWeight fontWeight = FontWeight.normal;
+    BorderRadius? borderRadius = BorderRadius.circular(8);
 
     if (isInactive) {
       textColor = AppPallete.outlineVariant;
-    } else if (isSelected) {
-      bgColor = AppPallete.primaryFixed;
-      textColor = AppPallete.onPrimaryFixed;
+    } else if (isStart || isEnd) {
+      bgColor = AppPallete.primary;
+      textColor = AppPallete.onPrimary;
       fontWeight = FontWeight.bold;
-      border = Border.all(color: AppPallete.primary, width: 2.0);
+      if (isStart && isEnd) {
+        borderRadius = BorderRadius.circular(8);
+      } else if (isStart) {
+        borderRadius = const BorderRadius.only(
+          topLeft: Radius.circular(8),
+          bottomLeft: Radius.circular(8),
+        );
+      } else {
+        borderRadius = const BorderRadius.only(
+          topRight: Radius.circular(8),
+          bottomRight: Radius.circular(8),
+        );
+      }
+    } else if (isInRange) {
+      bgColor = AppPallete.primary.withValues(alpha: 0.15);
+      textColor = AppPallete.primary;
+      fontWeight = FontWeight.w500;
+      borderRadius = BorderRadius.zero;
     } else if (isOccupied) {
       bgColor = Colors.transparent;
       textColor = AppPallete.secondary;
@@ -295,13 +350,13 @@ class CalendarDaySquare extends StatelessWidget {
 
     return InkWell(
       onTap: isInactive ? null : onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: borderRadius,
       child: Container(
         width: 36,
         height: 36,
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: borderRadius,
           border: border,
         ),
         child: Center(

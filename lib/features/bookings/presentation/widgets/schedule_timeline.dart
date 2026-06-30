@@ -9,7 +9,8 @@ class ScheduleTimeline extends StatelessWidget {
   final double hourlyPrice;
   final String dateLabel;
   final List<Booking> bookings;
-  final DateTime selectedDate;
+  final DateTime startDate;
+  final DateTime endDate;
 
   const ScheduleTimeline({
     super.key,
@@ -18,7 +19,8 @@ class ScheduleTimeline extends StatelessWidget {
     required this.hourlyPrice,
     required this.dateLabel,
     required this.bookings,
-    required this.selectedDate,
+    required this.startDate,
+    required this.endDate,
   });
 
   @override
@@ -71,10 +73,20 @@ class ScheduleTimeline extends StatelessWidget {
                 separatorBuilder: (context, index) => const SizedBox(width: 10),
                 itemBuilder: (context, index) {
                   final hour = hours[index];
+                  final List<DateTime> daysInRange = [];
+                  DateTime current = DateTime(startDate.year, startDate.month, startDate.day);
+                  final endCompare = DateTime(endDate.year, endDate.month, endDate.day);
+                  while (!current.isAfter(endCompare)) {
+                    daysInRange.add(current);
+                    current = current.add(const Duration(days: 1));
+                  }
+
                   final isOccupied = bookings.any((booking) {
-                    final slotStart = DateTime(selectedDate.year, selectedDate.month, selectedDate.day, hour);
-                    final slotEnd = DateTime(selectedDate.year, selectedDate.month, selectedDate.day, hour + 1);
-                    return booking.startTime.isBefore(slotEnd) && booking.endTime.isAfter(slotStart);
+                    return daysInRange.any((day) {
+                      final slotStart = DateTime(day.year, day.month, day.day, hour);
+                      final slotEnd = DateTime(day.year, day.month, day.day, hour + 1);
+                      return booking.startTime.isBefore(slotEnd) && booking.endTime.isAfter(slotStart);
+                    });
                   });
                   final isSelected = selectedSlots.contains(hour);
 

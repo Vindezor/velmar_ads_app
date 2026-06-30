@@ -11,14 +11,16 @@ final class BookingsFetchAvailability extends BookingsEvent {
 final class BookingsLoadConfirmationData extends BookingsEvent {
   final String userId;
   final String billboardId;
-  final DateTime selectedDate;
+  final DateTime startDate;
+  final DateTime endDate;
   final List<int> selectedSlots;
   final String assetId;
 
   BookingsLoadConfirmationData({
     required this.userId,
     required this.billboardId,
-    required this.selectedDate,
+    required this.startDate,
+    required this.endDate,
     required this.selectedSlots,
     required this.assetId,
   });

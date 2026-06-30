@@ -4,13 +4,15 @@ import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
 
 class ConfirmationDetailsBento extends StatelessWidget {
   final Billboard billboard;
-  final DateTime selectedDate;
+  final DateTime startDate;
+  final DateTime endDate;
   final List<int> selectedSlots;
 
   const ConfirmationDetailsBento({
     super.key,
     required this.billboard,
-    required this.selectedDate,
+    required this.startDate,
+    required this.endDate,
     required this.selectedSlots,
   });
 
@@ -91,10 +93,19 @@ class ConfirmationDetailsBento extends StatelessWidget {
                 value: billboard.name,
               );
 
+              final String dateValue;
+              if (startDate.year == endDate.year &&
+                  startDate.month == endDate.month &&
+                  startDate.day == endDate.day) {
+                dateValue = _formatDate(startDate);
+              } else {
+                dateValue = '${_formatDate(startDate)} - ${_formatDate(endDate)}';
+              }
+
               final dateWidget = _buildBentoCell(
                 icon: Icons.calendar_month_outlined,
                 label: 'FECHA',
-                value: _formatDate(selectedDate),
+                value: dateValue,
               );
 
               final timeWidget = _buildBentoCell(

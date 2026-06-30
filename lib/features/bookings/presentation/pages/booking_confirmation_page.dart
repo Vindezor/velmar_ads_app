@@ -17,14 +17,16 @@ import 'package:velmar_ads/features/bookings/presentation/widgets/booking_error_
 
 class BookingConfirmationPage extends StatelessWidget {
   final Billboard? billboard;
-  final DateTime? selectedDate;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final List<int>? selectedSlots;
   final String? assetId;
 
   const BookingConfirmationPage({
     super.key,
     required this.billboard,
-    required this.selectedDate,
+    required this.startDate,
+    required this.endDate,
     required this.selectedSlots,
     required this.assetId,
   });
@@ -52,7 +54,7 @@ class BookingConfirmationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (billboard == null || selectedDate == null || selectedSlots == null || assetId == null) {
+    if (billboard == null || startDate == null || endDate == null || selectedSlots == null || assetId == null) {
       return const Scaffold(
         appBar: ConfirmationAppBar(),
         body: Center(
@@ -96,15 +98,15 @@ class BookingConfirmationPage extends StatelessWidget {
               body: BookingSuccessView(
                 billboard: billboard!,
                 startTime: DateTime(
-                  selectedDate!.year,
-                  selectedDate!.month,
-                  selectedDate!.day,
+                  startDate!.year,
+                  startDate!.month,
+                  startDate!.day,
                   (List<int>.from(selectedSlots!)..sort()).first,
                 ),
                 endTime: DateTime(
-                  selectedDate!.year,
-                  selectedDate!.month,
-                  selectedDate!.day,
+                  endDate!.year,
+                  endDate!.month,
+                  endDate!.day,
                   (List<int>.from(selectedSlots!)..sort()).last + 1,
                 ),
               ),
@@ -121,7 +123,8 @@ class BookingConfirmationPage extends StatelessWidget {
                         BookingsLoadConfirmationData(
                           userId: (context.read<AppUserCubit>().state as AppUserLoggedIn).user.id,
                           billboardId: billboard!.id,
-                          selectedDate: selectedDate!,
+                          startDate: startDate!,
+                          endDate: endDate!,
                           selectedSlots: selectedSlots!,
                           assetId: assetId!,
                         ),
@@ -213,7 +216,8 @@ class BookingConfirmationPage extends StatelessWidget {
                               const SizedBox(height: AppSpacing.stackLg),
                               ConfirmationDetailsBento(
                                 billboard: billboard!,
-                                selectedDate: selectedDate!,
+                                startDate: startDate!,
+                                endDate: endDate!,
                                 selectedSlots: selectedSlots!,
                               ),
                             ],
@@ -257,7 +261,8 @@ class BookingConfirmationPage extends StatelessWidget {
                         const SizedBox(height: AppSpacing.stackLg),
                         ConfirmationDetailsBento(
                           billboard: billboard!,
-                          selectedDate: selectedDate!,
+                          startDate: startDate!,
+                          endDate: endDate!,
                           selectedSlots: selectedSlots!,
                         ),
                         const SizedBox(height: AppSpacing.stackLg),

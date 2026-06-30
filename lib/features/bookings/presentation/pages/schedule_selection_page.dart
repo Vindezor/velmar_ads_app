@@ -24,18 +24,21 @@ class ScheduleSelectionPage extends StatefulWidget {
 }
 
 class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
-  late DateTime _selectedDate;
+  DateTime? _startDate;
+  DateTime? _endDate;
   final List<int> _selectedSlots = [];
 
   @override
   void initState() {
     super.initState();
-    _selectedDate = DateTime.now();
+    _startDate = DateTime.now();
+    _endDate = DateTime.now();
   }
 
-  void _onDaySelected(DateTime date) {
+  void _onRangeChanged(DateTime start, DateTime? end) {
     setState(() {
-      _selectedDate = date;
+      _startDate = start;
+      _endDate = end;
       _selectedSlots.clear();
     });
   }
@@ -43,9 +46,46 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
   void _onSlotToggled(int hour) {
     setState(() {
       if (_selectedSlots.contains(hour)) {
-        _selectedSlots.remove(hour);
+        if (_selectedSlots.isEmpty) {
+          _selectedSlots.add(hour);
+        } else if (_selectedSlots.length == 1) {
+          final first = _selectedSlots.first;
+          if (hour == first) {
+            _selectedSlots.clear();
+          } else {
+            final start = first < hour ? first : hour;
+            final end = first < hour ? hour : first;
+            _selectedSlots.clear();
+            for (int i = start; i <= end; i++) {
+              _selectedSlots.add(i);
+            }
+          }
+        } else {
+          _selectedSlots.clear();
+          _selectedSlots.add(hour);
+        }
       } else {
-        _selectedSlots.add(hour);
+        if (_selectedSlots.isEmpty) {
+          _selectedSlots.add(hour);
+        } else {
+          _selectedSlots.sort();
+          final min = _selectedSlots.first;
+          final max = _selectedSlots.last;
+          if (hour < min) {
+            _selectedSlots.clear();
+            for (int i = hour; i <= max; i++) {
+              _selectedSlots.add(i);
+            }
+          } else if (hour > max) {
+            _selectedSlots.clear();
+            for (int i = min; i <= hour; i++) {
+              _selectedSlots.add(i);
+            }
+          } else {
+            _selectedSlots.clear();
+            _selectedSlots.add(hour);
+          }
+        }
       }
     });
   }
@@ -71,9 +111,47 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
 
     final b = widget.billboard!;
     final basePrice = b.pricePerHour;
-    final selectedHours = _selectedSlots.length;
+
+    final sortedSlots = List<int>.from(_selectedSlots)..sort();
+    final int selectedHours;
+    final String dateLabel;
+
+    if (sortedSlots.isEmpty || _startDate == null) {
+      selectedHours = 0;
+      dateLabel = 'Selecciona fecha y hora';
+    } else {
+      final actualEndDate = _endDate ?? _startDate!;
+      final minHour = sortedSlots.first;
+      final maxHour = sortedSlots.last;
+
+      final startDateTime = DateTime(
+        _startDate!.year,
+        _startDate!.month,
+        _startDate!.day,
+        minHour,
+      );
+      final endDateTime = DateTime(
+        actualEndDate.year,
+        actualEndDate.month,
+        actualEndDate.day,
+        maxHour + 1,
+      );
+
+      final diff = endDateTime.difference(startDateTime);
+      selectedHours = diff.inHours;
+
+      final startLabel = '${_startDate!.day} ${_getMonthAbbreviation(_startDate!.month)}';
+      if (_startDate!.day == actualEndDate.day &&
+          _startDate!.month == actualEndDate.month &&
+          _startDate!.year == actualEndDate.year) {
+        dateLabel = startLabel;
+      } else {
+        final endLabel = '${actualEndDate.day} ${_getMonthAbbreviation(actualEndDate.month)}';
+        dateLabel = '$startLabel - $endLabel';
+      }
+    }
+
     final subtotal = selectedHours * basePrice;
-    final dateLabel = '${_selectedDate.day} ${_getMonthAbbreviation(_selectedDate.month)}';
 
     return Scaffold(
       backgroundColor: AppPallete.background,
@@ -85,7 +163,7 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
             BookingsAvailabilityError(message: final msg) => Center(child: Text(msg)),
             BookingsAvailabilityLoaded(bookings: final bookings) => SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.stackLg),
+                  padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -96,8 +174,9 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                       ),
                       const SizedBox(height: 24),
                       ScheduleCalendar(
-                        selectedDate: _selectedDate,
-                        onDateChanged: _onDaySelected,
+                        startDate: _startDate,
+                        endDate: _endDate,
+                        onRangeChanged: _onRangeChanged,
                         bookings: bookings,
                       ),
                       const SizedBox(height: 24),
@@ -107,7 +186,8 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                         hourlyPrice: basePrice,
                         dateLabel: dateLabel,
                         bookings: bookings,
-                        selectedDate: _selectedDate,
+                        startDate: _startDate ?? DateTime.now(),
+                        endDate: _endDate ?? _startDate ?? DateTime.now(),
                       ),
                       const SizedBox(height: 24),
                       ScheduleSummary(
@@ -115,12 +195,14 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                         selectedHours: selectedHours,
                         subtotal: subtotal,
                         onContinue: () {
+                          if (_startDate == null || _selectedSlots.isEmpty) return;
                           context.pushNamed(
                             'upload-asset',
                             pathParameters: {'id': b.id},
                             extra: {
                               'billboard': b,
-                              'selectedDate': _selectedDate,
+                              'startDate': _startDate,
+                              'endDate': _endDate ?? _startDate,
                               'selectedSlots': _selectedSlots,
                             },
                           );

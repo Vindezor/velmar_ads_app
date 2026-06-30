@@ -147,15 +147,15 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     final maxHour = sortedSlots.last;
 
     final startTime = DateTime(
-      event.selectedDate.year,
-      event.selectedDate.month,
-      event.selectedDate.day,
+      event.startDate.year,
+      event.startDate.month,
+      event.startDate.day,
       minHour,
     );
     final endTime = DateTime(
-      event.selectedDate.year,
-      event.selectedDate.month,
-      event.selectedDate.day,
+      event.endDate.year,
+      event.endDate.month,
+      event.endDate.day,
       maxHour + 1,
     );
 

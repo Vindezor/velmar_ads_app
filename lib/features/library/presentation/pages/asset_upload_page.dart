@@ -20,13 +20,15 @@ enum UploadState { idle, uploading, completed }
 
 class AssetUploadPage extends StatefulWidget {
   final Billboard? billboard;
-  final DateTime? selectedDate;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final List<int>? selectedSlots;
 
   const AssetUploadPage({
     super.key,
     required this.billboard,
-    required this.selectedDate,
+    required this.startDate,
+    required this.endDate,
     required this.selectedSlots,
   });
 
@@ -162,12 +164,14 @@ class _AssetUploadPageState extends State<AssetUploadPage>
 
   void _onConfirmPressed() async {
     final b = widget.billboard;
-    final selectedDate = widget.selectedDate;
+    final startDate = widget.startDate;
+    final endDate = widget.endDate;
     final selectedSlots = widget.selectedSlots;
     final assetId = _uploadedAssetId;
 
     if (b == null ||
-        selectedDate == null ||
+        startDate == null ||
+        endDate == null ||
         selectedSlots == null ||
         assetId == null) {
       showSnackBar(context: context, message: 'Datos de reserva incompletos.');
@@ -183,7 +187,8 @@ class _AssetUploadPageState extends State<AssetUploadPage>
       pathParameters: {'id': b.id},
       extra: {
         'billboard': b,
-        'selectedDate': selectedDate,
+        'startDate': startDate,
+        'endDate': endDate,
         'selectedSlots': selectedSlots,
         'assetId': assetId,
       },

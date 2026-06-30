@@ -92,7 +92,8 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final extraMap = state.extra as Map<String, dynamic>?;
         final billboard = extraMap?['billboard'] as Billboard?;
-        final selectedDate = extraMap?['selectedDate'] as DateTime?;
+        final startDate = extraMap?['startDate'] as DateTime?;
+        final endDate = extraMap?['endDate'] as DateTime?;
         final selectedSlots = extraMap?['selectedSlots'] as List<int>?;
         final assetId = extraMap?['assetId'] as String?;
         return BlocProvider(
@@ -101,14 +102,16 @@ final GoRouter appRouter = GoRouter(
             final userState = context.read<AppUserCubit>().state;
             if (userState is AppUserLoggedIn &&
                 billboard != null &&
-                selectedDate != null &&
+                startDate != null &&
+                endDate != null &&
                 selectedSlots != null &&
                 assetId != null) {
               bloc.add(
                 BookingsLoadConfirmationData(
                   userId: userState.user.id,
                   billboardId: billboard.id,
-                  selectedDate: selectedDate,
+                  startDate: startDate,
+                  endDate: endDate,
                   selectedSlots: selectedSlots,
                   assetId: assetId,
                 ),
@@ -118,7 +121,8 @@ final GoRouter appRouter = GoRouter(
           },
           child: BookingConfirmationPage(
             billboard: billboard,
-            selectedDate: selectedDate,
+            startDate: startDate,
+            endDate: endDate,
             selectedSlots: selectedSlots,
             assetId: assetId,
           ),
@@ -169,13 +173,15 @@ final GoRouter appRouter = GoRouter(
                           builder: (context, state) {
                             final extraMap = state.extra as Map<String, dynamic>?;
                             final billboard = extraMap?['billboard'] as Billboard?;
-                            final selectedDate = extraMap?['selectedDate'] as DateTime?;
+                            final startDate = extraMap?['startDate'] as DateTime?;
+                            final endDate = extraMap?['endDate'] as DateTime?;
                             final selectedSlots = extraMap?['selectedSlots'] as List<int>?;
                             return BlocProvider(
                               create: (context) => serviceLocator<LibraryBloc>(),
                               child: AssetUploadPage(
                                 billboard: billboard,
-                                selectedDate: selectedDate,
+                                startDate: startDate,
+                                endDate: endDate,
                                 selectedSlots: selectedSlots,
                               ),
                             );
