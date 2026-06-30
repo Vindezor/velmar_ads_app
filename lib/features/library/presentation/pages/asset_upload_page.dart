@@ -26,10 +26,10 @@ class AssetUploadPage extends StatefulWidget {
 
   const AssetUploadPage({
     super.key,
-    required this.billboard,
-    required this.startDate,
-    required this.endDate,
-    required this.selectedSlots,
+    this.billboard,
+    this.startDate,
+    this.endDate,
+    this.selectedSlots,
   });
 
   @override
