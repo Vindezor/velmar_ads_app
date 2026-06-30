@@ -52,13 +52,17 @@ class _ScheduleCalendarState extends State<ScheduleCalendar> {
     final start = widget.startDate;
     final end = widget.endDate;
 
-    if (start == null || end != null) {
-      widget.onRangeChanged(clickedDate, null);
+    final clickedDateOnly = DateTime(clickedDate.year, clickedDate.month, clickedDate.day);
+    final startCompare = start != null ? DateTime(start.year, start.month, start.day) : null;
+    final endCompare = end != null ? DateTime(end.year, end.month, end.day) : null;
+
+    if (startCompare == null || endCompare == null || !startCompare.isAtSameMomentAs(endCompare)) {
+      widget.onRangeChanged(clickedDate, clickedDate);
     } else {
-      if (clickedDate.isBefore(start)) {
-        widget.onRangeChanged(clickedDate, null);
+      if (clickedDateOnly.isBefore(startCompare)) {
+        widget.onRangeChanged(clickedDate, clickedDate);
       } else {
-        widget.onRangeChanged(start, clickedDate);
+        widget.onRangeChanged(start!, clickedDate);
       }
     }
   }

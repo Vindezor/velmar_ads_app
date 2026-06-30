@@ -7,7 +7,7 @@ import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_app_bar.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_context_title.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_calendar.dart';
-import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_timeline.dart';
+import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_time_selector.dart';
 import 'package:velmar_ads/features/bookings/presentation/widgets/schedule_summary.dart';
 import 'package:velmar_ads/features/bookings/presentation/bloc/bookings_bloc.dart';
 
@@ -26,6 +26,8 @@ class ScheduleSelectionPage extends StatefulWidget {
 class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
   DateTime? _startDate;
   DateTime? _endDate;
+  int? _startHour;
+  int? _endHour;
   final List<int> _selectedSlots = [];
 
   @override
@@ -33,70 +35,46 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
     super.initState();
     _startDate = null;
     _endDate = null;
+    _startHour = null;
+    _endHour = null;
   }
 
   void _onRangeChanged(DateTime start, DateTime? end) {
     setState(() {
       _startDate = start;
       _endDate = end;
+      _startHour = null;
+      _endHour = null;
       _selectedSlots.clear();
     });
   }
 
-  void _onSlotToggled(int hour) {
+  void _onStartHourChanged(int? hour) {
     setState(() {
-      if (_selectedSlots.contains(hour)) {
-        if (_selectedSlots.isEmpty) {
-          _selectedSlots.add(hour);
-        } else if (_selectedSlots.length == 1) {
-          final first = _selectedSlots.first;
-          if (hour == first) {
-            _selectedSlots.clear();
-          } else {
-            final start = first < hour ? first : hour;
-            final end = first < hour ? hour : first;
-            _selectedSlots.clear();
-            for (int i = start; i <= end; i++) {
-              _selectedSlots.add(i);
-            }
-          }
-        } else {
-          _selectedSlots.clear();
-          _selectedSlots.add(hour);
-        }
-      } else {
-        if (_selectedSlots.isEmpty) {
-          _selectedSlots.add(hour);
-        } else {
-          _selectedSlots.sort();
-          final min = _selectedSlots.first;
-          final max = _selectedSlots.last;
-          if (hour < min) {
-            _selectedSlots.clear();
-            for (int i = hour; i <= max; i++) {
-              _selectedSlots.add(i);
-            }
-          } else if (hour > max) {
-            _selectedSlots.clear();
-            for (int i = min; i <= hour; i++) {
-              _selectedSlots.add(i);
-            }
-          } else {
-            _selectedSlots.clear();
-            _selectedSlots.add(hour);
-          }
-        }
+      _startHour = hour;
+      if (_endHour != null && hour != null && _endHour! <= hour) {
+        _endHour = null;
       }
+      _updateSelectedSlots();
     });
   }
 
-  String _getMonthAbbreviation(int month) {
-    const abbrev = [
-      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
-    ];
-    return abbrev[month - 1];
+  void _onEndHourChanged(int? hour) {
+    setState(() {
+      _endHour = hour;
+      _updateSelectedSlots();
+    });
   }
+
+  void _updateSelectedSlots() {
+    _selectedSlots.clear();
+    if (_startHour != null && _endHour != null) {
+      for (int i = _startHour!; i < _endHour!; i++) {
+        _selectedSlots.add(i);
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -114,11 +92,9 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
 
     final sortedSlots = List<int>.from(_selectedSlots)..sort();
     final int selectedHours;
-    final String dateLabel;
 
     if (sortedSlots.isEmpty || _startDate == null) {
       selectedHours = 0;
-      dateLabel = 'Selecciona fecha y hora';
     } else {
       final actualEndDate = _endDate ?? _startDate!;
       final minHour = sortedSlots.first;
@@ -139,16 +115,6 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
 
       final diff = endDateTime.difference(startDateTime);
       selectedHours = diff.inHours;
-
-      final startLabel = '${_startDate!.day} ${_getMonthAbbreviation(_startDate!.month)}';
-      if (_startDate!.day == actualEndDate.day &&
-          _startDate!.month == actualEndDate.month &&
-          _startDate!.year == actualEndDate.year) {
-        dateLabel = startLabel;
-      } else {
-        final endLabel = '${actualEndDate.day} ${_getMonthAbbreviation(actualEndDate.month)}';
-        dateLabel = '$startLabel - $endLabel';
-      }
     }
 
     final subtotal = selectedHours * basePrice;
@@ -187,7 +153,7 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Haz clic en el día de inicio y luego en el día de fin de tu campaña. Si es de un solo día, haz clic dos veces en el mismo día.',
+                              'Haz clic en el día de inicio y luego en el día de fin de tu campaña. Si es de un solo día, haz un único clic en ese día.',
                               style: AppTypography.bodySm.copyWith(
                                 color: AppPallete.secondary,
                               ),
@@ -217,7 +183,7 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Selecciona la hora de inicio y la hora de fin en el timeline. El intervalo intermedio se autocompletará.',
+                              'Selecciona la hora en la que iniciará tu campaña y la hora en la que terminará.',
                               style: AppTypography.bodySm.copyWith(
                                 color: AppPallete.secondary,
                               ),
@@ -226,14 +192,14 @@ class _ScheduleSelectionPageState extends State<ScheduleSelectionPage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ScheduleTimeline(
-                        selectedSlots: _selectedSlots,
-                        onSlotToggled: _onSlotToggled,
-                        hourlyPrice: basePrice,
-                        dateLabel: dateLabel,
+                      ScheduleTimeSelector(
+                        startHour: _startHour,
+                        endHour: _endHour,
+                        onStartHourChanged: _onStartHourChanged,
+                        onEndHourChanged: _onEndHourChanged,
+                        startDate: _startDate,
+                        endDate: _endDate,
                         bookings: bookings,
-                        startDate: _startDate ?? DateTime.now(),
-                        endDate: _endDate ?? _startDate ?? DateTime.now(),
                       ),
                       const SizedBox(height: 24),
                       ScheduleSummary(
