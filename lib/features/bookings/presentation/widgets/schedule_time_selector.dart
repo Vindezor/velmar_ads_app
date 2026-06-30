@@ -23,7 +23,6 @@ class ScheduleTimeSelector extends StatelessWidget {
   });
 
   String _formatHourLabel(int hour) {
-    if (hour == 24) return '24:00 (Fin del día)';
     final prefix = hour.toString().padLeft(2, '0');
     return '$prefix:00';
   }
@@ -172,6 +171,7 @@ class ScheduleTimeSelector extends StatelessWidget {
                   // Dropdown de Hora de Inicio
                   Expanded(
                     child: DropdownButtonFormField<int>(
+                      isExpanded: true,
                       decoration: dropdownDecoration(
                         labelText: 'HORA DE INICIO',
                       ),
@@ -200,6 +200,7 @@ class ScheduleTimeSelector extends StatelessWidget {
                   // Dropdown de Hora de Fin
                   Expanded(
                     child: DropdownButtonFormField<int>(
+                      isExpanded: true,
                       decoration: dropdownDecoration(
                         labelText: 'HORA DE FIN',
                       ),
