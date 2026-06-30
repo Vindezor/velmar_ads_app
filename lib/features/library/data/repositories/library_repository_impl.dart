@@ -20,7 +20,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
       : _remoteDataSource = remoteDataSource;
 
   @override
-  Future<Either<Failure, String>> uploadAdAsset({
+  Future<Either<Failure, CreativeAsset>> uploadAdAsset({
     required List<int> fileBytes,
     required String fileName,
     required String userId,
@@ -59,6 +59,18 @@ class LibraryRepositoryImpl implements LibraryRepository {
         fileType: fileType,
       );
 
+      final creativeAsset = CreativeAsset(
+        id: assetId,
+        userId: userId,
+        fileUrl: fileUrl,
+        fileType: fileType,
+        fileSizeMb: fileSizeMb,
+        originalFilename: fileName,
+        status: 'pending',
+        timesUsed: 0,
+        createdAt: DateTime.now(),
+      );
+
       _cachedUserAssets = null;
       _cachedUserId = null;
       _lastCacheTime = null;
@@ -67,7 +79,7 @@ class LibraryRepositoryImpl implements LibraryRepository {
         print('📦 [CACHE] Asset subido. Invalidando cache de assets para $userId.');
       }
 
-      return right(assetId);
+      return right(creativeAsset);
     } on ServerException catch (e) {
       if (isUploaded) {
         try {

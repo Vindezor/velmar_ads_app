@@ -45,7 +45,7 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
 
     result.fold(
       (failure) => emit(LibraryUploadFailure(error: failure.message)),
-      (assetId) => emit(LibraryUploadSuccess(assetId: assetId)),
+      (asset) => emit(LibraryUploadSuccess(asset: asset)),
     );
   }
 

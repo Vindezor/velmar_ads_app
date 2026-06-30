@@ -218,7 +218,7 @@ class _AssetUploadPageState extends State<AssetUploadPage>
     return BlocConsumer<LibraryBloc, LibraryState>(
       listener: (context, state) {
         if (state is LibraryUploadSuccess) {
-          _uploadedAssetId = state.assetId;
+          _uploadedAssetId = state.asset.id;
           // Si la animación ya terminó, pasar inmediatamente a completado
           if (!_uploadController.isAnimating && _uploadProgress >= 1.0) {
             setState(() {

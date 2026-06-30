@@ -8,8 +8,8 @@ class LibraryInitial extends LibraryState {}
 class LibraryLoading extends LibraryState {}
 
 class LibraryUploadSuccess extends LibraryState {
-  final String assetId;
-  LibraryUploadSuccess({required this.assetId});
+  final CreativeAsset asset;
+  LibraryUploadSuccess({required this.asset});
 }
 
 class LibraryUploadFailure extends LibraryState {

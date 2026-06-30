@@ -81,7 +81,7 @@ class _BookingCorrectionViewState extends State<BookingCorrectionView>
         if (libraryState is LibraryUploadSuccess) {
           setState(() {
             _uploadState = CorrectionUploadState.completed;
-            _uploadedAssetId = libraryState.assetId;
+            _uploadedAssetId = libraryState.asset.id;
           });
         }
       }

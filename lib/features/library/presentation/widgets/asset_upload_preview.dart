@@ -1,12 +1,27 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
+import 'package:velmar_ads/features/library/presentation/bloc/library_bloc.dart';
 
 class AssetUploadPreview extends StatelessWidget {
   const AssetUploadPreview({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final libraryState = context.read<LibraryBloc>().state;
+    String fileUrl = '';
+    String fileType = 'image';
+    String originalFilename = 'Vista previa';
+
+    if (libraryState is LibraryUploadSuccess) {
+      fileUrl = libraryState.asset.fileUrl;
+      fileType = libraryState.asset.fileType;
+      originalFilename = libraryState.asset.originalFilename;
+    }
+
+    final isVideo = fileType == 'video';
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: AppPallete.borderColor),
@@ -15,46 +30,73 @@ class AssetUploadPreview extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          // Simulated Digital Out of Home Ad Asset Preview
-          Image.network(
-            'https://lh3.googleusercontent.com/aida-public/AB6AXuDY0w3KW2MBy0AEYCjjQn92MQVdy-tETVgM-QMKfdGbpJLYz2QSCfnO4jx71zptYuQlyj-hWmg2Y92DP4LDVH_capKE6qMu0iodkV4WogjUeb02ryVaVIHjQjQ_VCgrvM972XpgbjHYOcmXTxPQfG6IMAM2ma36oZJuOSp3b0MgnKZxgfy0faZpfKKMy0kRuthlfFnNsZ45dQwzlXX-FPaW0mlLEIFLV6DBBXT8AwlOckA78ltbhH4fY7vazPr-GBcAtbY64FrDNJk',
-            width: double.infinity,
-            height: 250,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Container(
-                width: double.infinity,
-                height: 250,
-                color: AppPallete.surfaceContainerHigh,
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                width: double.infinity,
-                height: 250,
-                color: AppPallete.surfaceContainerHigh,
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.broken_image_outlined,
-                      size: 48,
-                      color: AppPallete.onSurfaceVariant,
+          if (isVideo)
+            Container(
+              width: double.infinity,
+              height: 250,
+              color: const Color(0xFF121212),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Icon(
+                    Icons.play_circle_fill,
+                    size: 64,
+                    color: Colors.white70,
+                  ),
+                  Positioned(
+                    bottom: 24,
+                    child: Text(
+                      originalFilename,
+                      style: AppTypography.bodySm.copyWith(
+                        color: Colors.white60,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: AppSpacing.stackSm),
-                    Text(
-                      'No se pudo cargar la vista previa',
-                      style: TextStyle(color: AppPallete.textSecondary),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Image.network(
+              fileUrl,
+              width: double.infinity,
+              height: 250,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  width: double.infinity,
+                  height: 250,
+                  color: AppPallete.surfaceContainerHigh,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: double.infinity,
+                  height: 250,
+                  color: AppPallete.surfaceContainerHigh,
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.broken_image_outlined,
+                        size: 48,
+                        color: AppPallete.onSurfaceVariant,
+                      ),
+                      SizedBox(height: AppSpacing.stackSm),
+                      Text(
+                        'No se pudo cargar la vista previa',
+                        style: TextStyle(color: AppPallete.textSecondary),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           // Format Badge/Insignia in Top-Right
           Positioned(
             top: 12,
@@ -72,14 +114,14 @@ class AssetUploadPreview extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.movie_outlined,
+                      Icon(
+                        isVideo ? Icons.movie_outlined : Icons.image_outlined,
                         size: 14,
                         color: AppPallete.onSurface,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'MP4',
+                        fileType.toUpperCase(),
                         style: AppTypography.labelSm.copyWith(
                           color: AppPallete.onSurface,
                         ),

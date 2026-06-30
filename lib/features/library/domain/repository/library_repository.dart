@@ -3,7 +3,7 @@ import 'package:velmar_ads/core/error/failures.dart';
 import 'package:velmar_ads/features/library/domain/entities/creative_asset.dart';
 
 abstract interface class LibraryRepository {
-  Future<Either<Failure, String>> uploadAdAsset({
+  Future<Either<Failure, CreativeAsset>> uploadAdAsset({
     required List<int> fileBytes,
     required String fileName,
     required String userId,

@@ -5,14 +5,16 @@ import 'package:velmar_ads/core/error/failures.dart';
 import 'package:velmar_ads/core/usecase/usecase.dart';
 import 'package:velmar_ads/features/library/domain/repository/library_repository.dart';
 
-class UploadAdAsset implements UseCase<String, UploadAdAssetParams> {
+import 'package:velmar_ads/features/library/domain/entities/creative_asset.dart';
+
+class UploadAdAsset implements UseCase<CreativeAsset, UploadAdAssetParams> {
   final LibraryRepository _repository;
 
   UploadAdAsset({required LibraryRepository repository})
       : _repository = repository;
 
   @override
-  Future<Either<Failure, String>> call(UploadAdAssetParams params) async {
+  Future<Either<Failure, CreativeAsset>> call(UploadAdAssetParams params) async {
     return await _repository.uploadAdAsset(
       fileBytes: params.fileBytes,
       fileName: params.fileName,
