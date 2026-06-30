@@ -166,7 +166,9 @@ class LibraryAssetCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Aprobado: $formattedDate',
+                    asset.status.toLowerCase() == 'approved'
+                        ? 'Aprobado: $formattedDate'
+                        : 'Subido: $formattedDate',
                     style: AppTypography.bodySm.copyWith(
                       color: AppPallete.secondary,
                       fontSize: 11,

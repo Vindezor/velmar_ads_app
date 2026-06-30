@@ -56,9 +56,7 @@ class AssetUploadApprovedList extends StatelessWidget {
   }
 
   Widget _buildList(BuildContext context, List<CreativeAsset> assets) {
-    final approvedAssets = assets
-        .where((a) => a.status.toLowerCase() == 'approved')
-        .toList();
+    final approvedAssets = assets;
 
     if (approvedAssets.isEmpty) {
       return Center(
@@ -74,7 +72,7 @@ class AssetUploadApprovedList extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'No tienes anuncios aprobados aún.',
+                'No tienes anuncios en tu biblioteca.',
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMd.copyWith(
                   color: AppPallete.secondary,
@@ -83,7 +81,7 @@ class AssetUploadApprovedList extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Sube un nuevo asset para que sea revisado y aprobado por moderación.',
+                'Sube un nuevo anuncio para comenzar.',
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySm.copyWith(
                   color: AppPallete.secondaryFixedDim,
