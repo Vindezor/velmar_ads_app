@@ -32,6 +32,7 @@ import 'package:velmar_ads/features/library/data/repositories/library_repository
 import 'package:velmar_ads/features/library/domain/repository/library_repository.dart';
 import 'package:velmar_ads/features/library/domain/usecases/upload_ad_asset.dart';
 import 'package:velmar_ads/features/library/domain/usecases/delete_ad_asset.dart';
+import 'package:velmar_ads/features/library/domain/usecases/get_user_assets.dart';
 import 'package:velmar_ads/features/library/presentation/bloc/library_bloc.dart';
 import 'package:velmar_ads/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:velmar_ads/features/profile/data/repositories/profile_repository_impl.dart';
@@ -86,7 +87,7 @@ void _initDashboard() {
     ..registerFactory<DashboardRemoteDataSource>(
       () => DashboardRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerFactory<DashboardRepository>(
+    ..registerLazySingleton<DashboardRepository>(
       () => DashboardRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => GetDashboardData(repository: serviceLocator()))
@@ -103,7 +104,7 @@ void _initBookings() {
     ..registerFactory<BookingsRemoteDataSource>(
       () => BookingsRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerFactory<BookingsRepository>(
+    ..registerLazySingleton<BookingsRepository>(
       () => BookingsRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => GetBillboardBookings(bookingsRepository: serviceLocator()))
@@ -136,15 +137,17 @@ void _initLibrary() {
     ..registerFactory<LibraryRemoteDataSource>(
       () => LibraryRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerFactory<LibraryRepository>(
+    ..registerLazySingleton<LibraryRepository>(
       () => LibraryRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => UploadAdAsset(repository: serviceLocator()))
     ..registerFactory(() => DeleteAdAsset(repository: serviceLocator()))
+    ..registerFactory(() => GetUserAssets(libraryRepository: serviceLocator()))
     ..registerFactory(
       () => LibraryBloc(
         uploadAdAsset: serviceLocator(),
         deleteAdAsset: serviceLocator(),
+        getUserAssets: serviceLocator(),
       ),
     );
 }
@@ -154,7 +157,7 @@ void _initProfile() {
     ..registerFactory<ProfileRemoteDataSource>(
       () => ProfileRemoteDataSourceImpl(supabaseClient: serviceLocator()),
     )
-    ..registerFactory<ProfileRepository>(
+    ..registerLazySingleton<ProfileRepository>(
       () => ProfileRepositoryImpl(remoteDataSource: serviceLocator()),
     )
     ..registerFactory(() => GetProfileDetails(profileRepository: serviceLocator()))

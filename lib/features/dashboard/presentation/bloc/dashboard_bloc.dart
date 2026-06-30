@@ -26,7 +26,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     DashboardFetchData event,
     Emitter<DashboardState> emit,
   ) async {
-    emit(DashboardLoading());
+    if (state is! DashboardLoaded) {
+      emit(DashboardLoading());
+    }
 
     final userState = _appUserCubit.state;
     if (userState is! AppUserLoggedIn) {
@@ -35,7 +37,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     }
 
     final userId = userState.user.id;
-    final res = await _getDashboardData(userId);
+    final res = await _getDashboardData(
+      GetDashboardDataParams(
+        userId: userId,
+        forceRefresh: event.forceRefresh,
+      ),
+    );
 
     res.fold(
       (failure) => emit(DashboardError(message: failure.message)),

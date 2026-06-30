@@ -3,9 +3,15 @@ part of 'profile_bloc.dart';
 @immutable
 sealed class ProfileEvent {}
 
-final class ProfileLoadDetails extends ProfileEvent {}
+final class ProfileLoadDetails extends ProfileEvent {
+  final bool forceRefresh;
+  ProfileLoadDetails({this.forceRefresh = false});
+}
 
-final class ProfileLoadCreditRequests extends ProfileEvent {}
+final class ProfileLoadCreditRequests extends ProfileEvent {
+  final bool forceRefresh;
+  ProfileLoadCreditRequests({this.forceRefresh = false});
+}
 
 final class ProfileResetState extends ProfileEvent {}
 

@@ -36,7 +36,10 @@ final class BookingsSubmitCheckout extends BookingsEvent {
   });
 }
 
-final class BookingsLoadUserBookings extends BookingsEvent {}
+final class BookingsLoadUserBookings extends BookingsEvent {
+  final bool forceRefresh;
+  BookingsLoadUserBookings({this.forceRefresh = false});
+}
 
 final class BookingsLoadBookingDetail extends BookingsEvent {
   final String bookingId;

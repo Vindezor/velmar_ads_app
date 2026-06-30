@@ -5,5 +5,6 @@ import 'package:velmar_ads/features/dashboard/domain/entities/dashboard_data.dar
 abstract interface class DashboardRepository {
   Future<Either<Failure, DashboardData>> getDashboardData({
     required String userId,
+    bool forceRefresh = false,
   });
 }

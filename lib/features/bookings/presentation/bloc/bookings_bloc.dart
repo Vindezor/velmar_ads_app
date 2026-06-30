@@ -274,13 +274,20 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     BookingsLoadUserBookings event,
     Emitter<BookingsState> emit,
   ) async {
-    emit(BookingsUserBookingsLoading());
+    if (state is! BookingsUserBookingsLoaded) {
+      emit(BookingsUserBookingsLoading());
+    }
     final userState = _appUserCubit.state;
     if (userState is! AppUserLoggedIn) {
       emit(BookingsUserBookingsError(message: 'Usuario no autenticado.'));
       return;
     }
-    final res = await _getUserBookings(userState.user.id);
+    final res = await _getUserBookings(
+      GetUserBookingsParams(
+        userId: userState.user.id,
+        forceRefresh: event.forceRefresh,
+      ),
+    );
     res.fold(
       (failure) => emit(BookingsUserBookingsError(message: failure.message)),
       (bookings) => emit(BookingsUserBookingsLoaded(bookings: bookings)),
