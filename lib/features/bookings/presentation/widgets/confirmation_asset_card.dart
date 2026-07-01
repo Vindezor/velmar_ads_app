@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
+import 'package:velmar_ads/features/bookings/presentation/widgets/confirmation_video_preview.dart';
 
 class ConfirmationAssetCard extends StatelessWidget {
   final String originalFilename;
@@ -77,16 +78,7 @@ class ConfirmationAssetCard extends StatelessWidget {
                     child: Stack(
                       children: [
                         if (isVideo)
-                          Container(
-                            color: AppPallete.surfaceVariant,
-                            child: const Center(
-                              child: Icon(
-                                Icons.play_circle_outline,
-                                size: 48,
-                                color: AppPallete.primary,
-                              ),
-                            ),
-                          )
+                          ConfirmationVideoPreview(videoUrl: fileUrl)
                         else if (fileUrl.isNotEmpty)
                           Image.network(
                             fileUrl,

@@ -31,7 +31,39 @@ class ScheduleTimeSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
 
-    // 1. Determinar la hora mínima de inicio permitida si es hoy (hora actual + 2)
+    // 1. Determinar el límite de bookings por slot
+    int limit = 6;
+    for (final b in bookings) {
+      if (b.bookingTypeMaxAdsPerSlot != null) {
+        limit = b.bookingTypeMaxAdsPerSlot!;
+        break;
+      }
+    }
+
+    // Helper para verificar si un slot horario está lleno en el rango de fechas
+    bool isHourSlotFull(int hour, DateTime start, DateTime? end) {
+      final actualEnd = end ?? start;
+      final daysCount = actualEnd.difference(start).inDays + 1;
+      
+      for (int i = 0; i < daysCount; i++) {
+        final currentDay = start.add(Duration(days: i));
+        final slotStart = DateTime(currentDay.year, currentDay.month, currentDay.day, hour, 0, 0);
+        final slotEnd = DateTime(currentDay.year, currentDay.month, currentDay.day, hour + 1, 0, 0);
+        
+        int count = 0;
+        for (final booking in bookings) {
+          if (booking.startTime.isBefore(slotEnd) && booking.endTime.isAfter(slotStart)) {
+            count++;
+          }
+        }
+        if (count >= limit) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // 2. Determinar la hora mínima de inicio permitida si es hoy (hora actual + 2)
     int minStartHour = 0;
     if (startDate != null &&
         startDate!.year == now.year &&
@@ -45,9 +77,11 @@ class ScheduleTimeSelector extends StatelessWidget {
 
     // Generar lista de horas de inicio válidas (de minStartHour a 23)
     final List<int> availableStartHours = [];
-    if (!isTodayNoHoursAvailable) {
+    if (!isTodayNoHoursAvailable && startDate != null) {
       for (int h = minStartHour; h <= 23; h++) {
-        availableStartHours.add(h);
+        if (!isHourSlotFull(h, startDate!, endDate)) {
+          availableStartHours.add(h);
+        }
       }
     }
 
@@ -58,16 +92,23 @@ class ScheduleTimeSelector extends StatelessWidget {
          startDate!.month != endDate!.month ||
          startDate!.day != endDate!.day);
 
-    if (isMultiday) {
-      // Si son días distintos, se permiten las 24 horas de fin de forma libre
-      for (int h = 1; h <= 24; h++) {
-        availableEndHours.add(h);
-      }
-    } else {
-      // Mismo día (o fin aún no seleccionado): la hora de fin debe ser posterior a la de inicio
-      if (startHour != null) {
-        for (int h = startHour! + 1; h <= 24; h++) {
-          availableEndHours.add(h);
+    if (startDate != null) {
+      if (isMultiday) {
+        // Si son días distintos, se permiten las 24 horas de fin si el slot correspondiente no está lleno
+        for (int h = 1; h <= 24; h++) {
+          if (!isHourSlotFull(h - 1, startDate!, endDate)) {
+            availableEndHours.add(h);
+          }
+        }
+      } else {
+        // Mismo día: la hora de fin debe ser posterior a la de inicio y no cruzar ningún slot lleno
+        if (startHour != null) {
+          for (int h = startHour! + 1; h <= 24; h++) {
+            if (isHourSlotFull(h - 1, startDate!, endDate)) {
+              break; // Se detiene al encontrar el primer slot lleno
+            }
+            availableEndHours.add(h);
+          }
         }
       }
     }

@@ -86,7 +86,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       _controller.pause();
     }
 
-    await Navigator.of(context).push(
+    await Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
         builder: (context) => FullscreenVideoPlayer(
           controller: _controller,

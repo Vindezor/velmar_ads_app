@@ -51,13 +51,10 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
   void dispose() {
     widget.controller.removeListener(_videoListener);
     
-    // Restore system UI overlays and orientation limits
+    // Restore system UI overlays and lock orientation to portrait only
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
     ]);
     
     super.dispose();

@@ -223,11 +223,33 @@ class _ScheduleCalendarState extends State<ScheduleCalendar> {
                       final isInRange = startToCompare != null && endToCompare != null &&
                           dateToCompare.isAfter(startToCompare) && dateToCompare.isBefore(endToCompare);
 
-                      final hasBookings = widget.bookings.any((booking) {
-                        final dayStart = DateTime(dayData.date.year, dayData.date.month, dayData.date.day, 0, 0, 0);
-                        final dayEnd = DateTime(dayData.date.year, dayData.date.month, dayData.date.day, 23, 59, 59, 999);
-                        return booking.startTime.isBefore(dayEnd) && booking.endTime.isAfter(dayStart);
-                      });
+                      int limit = 6;
+                      for (final b in widget.bookings) {
+                        if (b.bookingTypeMaxAdsPerSlot != null) {
+                          limit = b.bookingTypeMaxAdsPerSlot!;
+                          break;
+                        }
+                      }
+
+                      bool isFull = false;
+                      if (!isInactive) {
+                        for (int h = 0; h < 24; h++) {
+                          final slotStart = DateTime(dayData.date.year, dayData.date.month, dayData.date.day, h, 0, 0);
+                          final slotEnd = DateTime(dayData.date.year, dayData.date.month, dayData.date.day, h + 1, 0, 0);
+                          
+                          int count = 0;
+                          for (final booking in widget.bookings) {
+                            if (booking.startTime.isBefore(slotEnd) && booking.endTime.isAfter(slotStart)) {
+                              count++;
+                            }
+                          }
+                          
+                          if (count >= limit) {
+                            isFull = true;
+                            break;
+                          }
+                        }
+                      }
 
                       return CalendarDaySquare(
                         day: dayData.date.day,
@@ -236,7 +258,7 @@ class _ScheduleCalendarState extends State<ScheduleCalendar> {
                         isStart: isStart,
                         isEnd: isEnd,
                         isInRange: isInRange,
-                        isOccupied: !isInactive && hasBookings,
+                        isOccupied: !isInactive && isFull,
                         onTap: () => _handleDayTap(dayData.date),
                       );
                     }).toList(),
@@ -253,7 +275,7 @@ class _ScheduleCalendarState extends State<ScheduleCalendar> {
                 SizedBox(width: 16),
                 CalendarLegendCircle(color: AppPallete.primaryFixed, label: 'Seleccionado'),
                 SizedBox(width: 16),
-                CalendarLegendCircle(color: Colors.transparent, label: 'No Disponible', border: true),
+                CalendarLegendCircle(color: Color(0xFFFFEBEE), label: 'No Disponible'),
               ],
             ),
           ],
@@ -344,9 +366,9 @@ class CalendarDaySquare extends StatelessWidget {
       fontWeight = FontWeight.w500;
       borderRadius = BorderRadius.zero;
     } else if (isOccupied) {
-      bgColor = Colors.transparent;
-      textColor = AppPallete.secondary;
-      border = Border.all(color: AppPallete.outlineVariant);
+      bgColor = const Color(0xFFFFEBEE);
+      textColor = const Color(0xFFC62828);
+      border = Border.all(color: const Color(0xFFFFCDD2));
     } else {
       bgColor = const Color(0xFFE8F5E9);
       textColor = const Color(0xFF2E7D32);

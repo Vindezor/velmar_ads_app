@@ -105,7 +105,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
     try {
       final response = await supabaseClient
           .from('bookings')
-          .select('*')
+          .select('*, billboards(*), creative_assets(*), booking_types(*)')
           .eq('billboard_id', billboardId)
           .inFilter('status', ['approved', 'pending', 'resubmitted']);
 
