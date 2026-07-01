@@ -85,31 +85,14 @@ class ScheduleTimeSelector extends StatelessWidget {
       }
     }
 
-    // Generar lista de horas de fin válidas
+    // Generar lista de horas de fin válidas (deben ser posteriores a la hora de inicio)
     final List<int> availableEndHours = [];
-    final bool isMultiday = startDate != null && endDate != null &&
-        (startDate!.year != endDate!.year ||
-         startDate!.month != endDate!.month ||
-         startDate!.day != endDate!.day);
-
-    if (startDate != null) {
-      if (isMultiday) {
-        // Si son días distintos, se permiten las 24 horas de fin si el slot correspondiente no está lleno
-        for (int h = 1; h <= 24; h++) {
-          if (!isHourSlotFull(h - 1, startDate!, endDate)) {
-            availableEndHours.add(h);
-          }
+    if (startDate != null && startHour != null) {
+      for (int h = startHour! + 1; h <= 24; h++) {
+        if (isHourSlotFull(h - 1, startDate!, endDate)) {
+          break; // Se detiene al encontrar el primer slot lleno
         }
-      } else {
-        // Mismo día: la hora de fin debe ser posterior a la de inicio y no cruzar ningún slot lleno
-        if (startHour != null) {
-          for (int h = startHour! + 1; h <= 24; h++) {
-            if (isHourSlotFull(h - 1, startDate!, endDate)) {
-              break; // Se detiene al encontrar el primer slot lleno
-            }
-            availableEndHours.add(h);
-          }
-        }
+        availableEndHours.add(h);
       }
     }
 
@@ -261,7 +244,7 @@ class ScheduleTimeSelector extends StatelessWidget {
                         color: AppPallete.onSurface,
                         fontWeight: FontWeight.w500,
                       ),
-                      items: !isMultiday && startHour == null
+                      items: startHour == null
                           ? null
                           : availableEndHours.map((hour) {
                               return DropdownMenuItem<int>(
@@ -269,7 +252,7 @@ class ScheduleTimeSelector extends StatelessWidget {
                                 child: Text(_formatHourLabel(hour)),
                               );
                             }).toList(),
-                      onChanged: !isMultiday && startHour == null ? null : onEndHourChanged,
+                      onChanged: startHour == null ? null : onEndHourChanged,
                     ),
                   ),
                 ],
