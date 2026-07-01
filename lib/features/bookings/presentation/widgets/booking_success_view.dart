@@ -97,7 +97,12 @@ class BookingSuccessView extends StatelessWidget {
               Column(
                 children: [
                   OutlinedButton(
-                    onPressed: () => context.go('/bookings'),
+                    onPressed: () {
+                      context.go('/dashboard');
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        context.go('/bookings');
+                      });
+                    },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppPallete.primaryContainer,
                       side: const BorderSide(color: AppPallete.primaryContainer),

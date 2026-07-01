@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:velmar_ads/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/core/utils/show_snackbar.dart';
@@ -92,22 +93,57 @@ class BookingConfirmationPage extends StatelessWidget {
                 ),
               ),
             ),
-          BookingsConfirmationSuccess() => Scaffold(
-              backgroundColor: AppPallete.background,
-              appBar: const ConfirmationAppBar(),
-              body: BookingSuccessView(
-                billboard: billboard!,
-                startTime: DateTime(
-                  startDate!.year,
-                  startDate!.month,
-                  startDate!.day,
-                  (List<int>.from(selectedSlots!)..sort()).first,
+          BookingsConfirmationSuccess() => PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, result) {
+                if (!didPop) {
+                  context.go('/dashboard');
+                }
+              },
+              child: Scaffold(
+                backgroundColor: AppPallete.background,
+                appBar: AppBar(
+                  backgroundColor: AppPallete.surface,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  leading: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: AppPallete.primary,
+                    ),
+                    onPressed: () {
+                      context.go('/dashboard');
+                    },
+                  ),
+                  centerTitle: true,
+                  title: Text(
+                    'Velmar Ads',
+                    style: AppTypography.headlineMd.copyWith(
+                      color: AppPallete.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  shape: const Border(
+                    bottom: BorderSide(
+                      color: AppPallete.outlineVariant,
+                      width: 1.0,
+                    ),
+                  ),
                 ),
-                endTime: DateTime(
-                  endDate!.year,
-                  endDate!.month,
-                  endDate!.day,
-                  (List<int>.from(selectedSlots!)..sort()).last + 1,
+                body: BookingSuccessView(
+                  billboard: billboard!,
+                  startTime: DateTime(
+                    startDate!.year,
+                    startDate!.month,
+                    startDate!.day,
+                    (List<int>.from(selectedSlots!)..sort()).first,
+                  ),
+                  endTime: DateTime(
+                    endDate!.year,
+                    endDate!.month,
+                    endDate!.day,
+                    (List<int>.from(selectedSlots!)..sort()).last + 1,
+                  ),
                 ),
               ),
             ),
