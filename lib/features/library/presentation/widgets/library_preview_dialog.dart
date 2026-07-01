@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/features/library/domain/entities/creative_asset.dart';
+import 'package:velmar_ads/features/library/presentation/widgets/video_player_widget.dart';
 
 class LibraryPreviewDialog extends StatelessWidget {
   final CreativeAsset asset;
@@ -53,50 +54,24 @@ class LibraryPreviewDialog extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // File content network image
-                          Image.network(
-                            asset.fileUrl,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: AppPallete.surfaceContainerLow,
-                                width: 250,
-                                height: 400,
-                                child: const Icon(
-                                  Icons.broken_image_outlined,
-                                  color: AppPallete.secondary,
-                                  size: 48,
-                                ),
-                              );
-                            },
-                          ),
-                          // Video badge indicator center
-                          if (isVideo)
-                            Container(
-                              width: 64,
-                              height: 64,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                shape: BoxShape.circle,
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 16,
-                                    offset: Offset(0, 4),
+                      child: isVideo
+                          ? VideoPlayerWidget(videoUrl: asset.fileUrl, autoPlay: true)
+                          : Image.network(
+                              asset.fileUrl,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: AppPallete.surfaceContainerLow,
+                                  width: 250,
+                                  height: 400,
+                                  child: const Icon(
+                                    Icons.broken_image_outlined,
+                                    color: AppPallete.secondary,
+                                    size: 48,
                                   ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.play_arrow,
-                                color: AppPallete.primary,
-                                size: 36,
-                              ),
+                                );
+                              },
                             ),
-                        ],
-                      ),
                     ),
                   ),
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/features/library/domain/entities/creative_asset.dart';
+import 'package:velmar_ads/features/library/presentation/widgets/video_thumbnail_widget.dart';
 
 class LibraryAssetCard extends StatelessWidget {
   final CreativeAsset asset;
@@ -65,22 +66,24 @@ class LibraryAssetCard extends StatelessWidget {
             Expanded(
               child: Stack(
                 children: [
-                  // Image
+                  // Image/Video Thumbnail
                   Positioned.fill(
-                    child: Image.network(
-                      asset.fileUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: AppPallete.surfaceContainerLow,
-                          child: const Icon(
-                            Icons.image_not_supported_outlined,
-                            color: AppPallete.secondary,
-                            size: 32,
+                    child: isVideo
+                        ? VideoThumbnailWidget(videoUrl: asset.fileUrl)
+                        : Image.network(
+                            asset.fileUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: AppPallete.surfaceContainerLow,
+                                child: const Icon(
+                                  Icons.image_not_supported_outlined,
+                                  color: AppPallete.secondary,
+                                  size: 32,
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
                   // Status Badge Overlay
                   Positioned(

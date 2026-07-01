@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/features/library/presentation/bloc/library_bloc.dart';
+import 'package:velmar_ads/features/library/presentation/widgets/video_player_widget.dart';
 
 class AssetUploadPreview extends StatelessWidget {
   const AssetUploadPreview({super.key});
@@ -12,12 +13,10 @@ class AssetUploadPreview extends StatelessWidget {
     final libraryState = context.read<LibraryBloc>().state;
     String fileUrl = '';
     String fileType = 'image';
-    String originalFilename = 'Vista previa';
 
     if (libraryState is LibraryUploadSuccess) {
       fileUrl = libraryState.asset.fileUrl;
       fileType = libraryState.asset.fileType;
-      originalFilename = libraryState.asset.originalFilename;
     }
 
     final isVideo = fileType == 'video';
@@ -31,32 +30,7 @@ class AssetUploadPreview extends StatelessWidget {
       child: Stack(
         children: [
           if (isVideo)
-            Container(
-              width: double.infinity,
-              height: 250,
-              color: const Color(0xFF121212),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  const Icon(
-                    Icons.play_circle_fill,
-                    size: 64,
-                    color: Colors.white70,
-                  ),
-                  Positioned(
-                    bottom: 24,
-                    child: Text(
-                      originalFilename,
-                      style: AppTypography.bodySm.copyWith(
-                        color: Colors.white60,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-            )
+            VideoPlayerWidget(videoUrl: fileUrl)
           else
             Image.network(
               fileUrl,
