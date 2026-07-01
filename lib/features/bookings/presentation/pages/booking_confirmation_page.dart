@@ -99,6 +99,7 @@ class BookingConfirmationPage extends StatelessWidget {
               onPopInvokedWithResult: (didPop, result) {
                 if (!didPop) {
                   shouldResetDashboard = true;
+                  dashboardNavigatorKey.currentState?.popUntil((route) => route.isFirst);
                   context.go('/dashboard');
                 }
               },
@@ -115,6 +116,7 @@ class BookingConfirmationPage extends StatelessWidget {
                     ),
                     onPressed: () {
                       shouldResetDashboard = true;
+                      dashboardNavigatorKey.currentState?.popUntil((route) => route.isFirst);
                       context.go('/dashboard');
                     },
                   ),

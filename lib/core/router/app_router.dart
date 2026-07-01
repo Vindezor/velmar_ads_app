@@ -43,6 +43,8 @@ class GoRouterRefreshStream extends ChangeNotifier {
   }
 }
 
+final GlobalKey<NavigatorState> dashboardNavigatorKey = GlobalKey<NavigatorState>();
+
 bool shouldResetDashboard = false;
 
 final GoRouter appRouter = GoRouter(
@@ -139,6 +141,7 @@ final GoRouter appRouter = GoRouter(
       },
       branches: [
         StatefulShellBranch(
+          navigatorKey: dashboardNavigatorKey,
           routes: [
             GoRoute(
               path: AppRoutes.dashboard,

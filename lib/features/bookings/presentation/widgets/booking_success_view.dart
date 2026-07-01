@@ -100,6 +100,7 @@ class BookingSuccessView extends StatelessWidget {
                   OutlinedButton(
                     onPressed: () {
                       shouldResetDashboard = true;
+                      dashboardNavigatorKey.currentState?.popUntil((route) => route.isFirst);
                       context.go('/bookings');
                     },
                     style: OutlinedButton.styleFrom(
@@ -121,6 +122,7 @@ class BookingSuccessView extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       shouldResetDashboard = true;
+                      dashboardNavigatorKey.currentState?.popUntil((route) => route.isFirst);
                       context.go('/dashboard');
                     },
                     style: ElevatedButton.styleFrom(
