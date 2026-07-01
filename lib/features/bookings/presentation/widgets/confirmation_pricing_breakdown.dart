@@ -56,12 +56,15 @@ class ConfirmationPricingBreakdown extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Tarifa Base ($selectedHours horas)',
-                  style: AppTypography.bodyMd.copyWith(
-                    color: AppPallete.onSurfaceVariant,
+                Expanded(
+                  child: Text(
+                    'Tarifa Base ($selectedHours horas)',
+                    style: AppTypography.bodyMd.copyWith(
+                      color: AppPallete.onSurfaceVariant,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   CurrencyFormatter.format(base),
                   style: AppTypography.bodyMd.copyWith(
@@ -76,12 +79,15 @@ class ConfirmationPricingBreakdown extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Horario Prime Time / Multiplicador',
-                    style: AppTypography.bodyMd.copyWith(
-                      color: AppPallete.onSurfaceVariant,
+                  Expanded(
+                    child: Text(
+                      'Horario Prime Time / Multiplicador',
+                      style: AppTypography.bodyMd.copyWith(
+                        color: AppPallete.onSurfaceVariant,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     CurrencyFormatter.format(multiplierAdjustment),
                     style: AppTypography.bodyMd.copyWith(
@@ -97,12 +103,15 @@ class ConfirmationPricingBreakdown extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Impuestos',
-                    style: AppTypography.bodyMd.copyWith(
-                      color: AppPallete.onSurfaceVariant,
+                  Expanded(
+                    child: Text(
+                      'Impuestos',
+                      style: AppTypography.bodyMd.copyWith(
+                        color: AppPallete.onSurfaceVariant,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     CurrencyFormatter.format(tax),
                     style: AppTypography.bodyMd.copyWith(
@@ -119,13 +128,16 @@ class ConfirmationPricingBreakdown extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Total',
-                  style: AppTypography.headlineMd.copyWith(
-                    color: AppPallete.onSurface,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    'Total',
+                    style: AppTypography.headlineMd.copyWith(
+                      color: AppPallete.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   CurrencyFormatter.format(total),
                   style: AppTypography.headlineLg.copyWith(
