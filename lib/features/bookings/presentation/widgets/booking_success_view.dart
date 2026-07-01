@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:velmar_ads/core/router/app_router.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 import 'package:velmar_ads/core/utils/date_formatter.dart';
 import 'package:velmar_ads/features/dashboard/domain/entities/billboard.dart';
@@ -94,14 +95,12 @@ class BookingSuccessView extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Actions
-              Column(
+               Column(
                 children: [
                   OutlinedButton(
                     onPressed: () {
-                      context.go('/dashboard');
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        context.go('/bookings');
-                      });
+                      dashboardNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+                      context.go('/bookings');
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppPallete.primaryContainer,
@@ -120,7 +119,10 @@ class BookingSuccessView extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.stackMd),
                   ElevatedButton(
-                    onPressed: () => context.go('/dashboard'),
+                    onPressed: () {
+                      dashboardNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+                      context.go('/dashboard');
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppPallete.primaryContainer,
                       foregroundColor: AppPallete.onPrimary,
