@@ -18,14 +18,15 @@ class NavigationShell extends StatelessWidget {
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: navigationShell.currentIndex,
         onTap: (index) {
-          final bool reset = index == navigationShell.currentIndex || (index == 0 && shouldResetDashboard);
           if (index == 0 && shouldResetDashboard) {
             shouldResetDashboard = false;
+            context.go('/dashboard');
+          } else {
+            navigationShell.goBranch(
+              index,
+              initialLocation: index == navigationShell.currentIndex,
+            );
           }
-          navigationShell.goBranch(
-            index,
-            initialLocation: reset,
-          );
         },
       ),
     );
