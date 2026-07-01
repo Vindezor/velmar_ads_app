@@ -4,11 +4,13 @@ import 'package:video_player/video_player.dart';
 import 'package:velmar_ads/core/theme/app_pallete.dart';
 
 class FullscreenVideoPlayer extends StatefulWidget {
-  final VideoPlayerController controller;
+  final String videoUrl;
+  final Duration initialPosition;
 
   const FullscreenVideoPlayer({
     super.key,
-    required this.controller,
+    required this.videoUrl,
+    this.initialPosition = Duration.zero,
   });
 
   @override
@@ -16,6 +18,9 @@ class FullscreenVideoPlayer extends StatefulWidget {
 }
 
 class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
+  late VideoPlayerController _controller;
+  bool _isInitialized = false;
+  bool _hasError = false;
   bool _showControls = true;
 
   @override
@@ -23,22 +28,42 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
     super.initState();
     // Hide status bar and navigation bar
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    
-    // Auto-rotate screen based on video aspect ratio
-    final double aspect = widget.controller.value.aspectRatio;
-    if (aspect > 1.0) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-    } else {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
+    _initializePlayer();
+  }
+
+  Future<void> _initializePlayer() async {
+    try {
+      _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+      await _controller.initialize();
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+        await _controller.seekTo(widget.initialPosition);
+        _controller.play();
+        _controller.addListener(_videoListener);
+        
+        // Auto-rotate screen based on video aspect ratio
+        final double aspect = _controller.value.aspectRatio;
+        if (aspect > 1.0) {
+          SystemChrome.setPreferredOrientations([
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+          ]);
+        } else {
+          SystemChrome.setPreferredOrientations([
+            DeviceOrientation.portraitUp,
+            DeviceOrientation.portraitDown,
+          ]);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+        });
+      }
     }
-    
-    widget.controller.addListener(_videoListener);
   }
 
   void _videoListener() {
@@ -49,7 +74,10 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
 
   @override
   void dispose() {
-    widget.controller.removeListener(_videoListener);
+    if (_isInitialized) {
+      _controller.removeListener(_videoListener);
+      _controller.dispose();
+    }
     
     // Restore system UI overlays and lock orientation to portrait only
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -62,17 +90,17 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
 
   void _togglePlay() {
     setState(() {
-      if (widget.controller.value.isPlaying) {
-        widget.controller.pause();
+      if (_controller.value.isPlaying) {
+        _controller.pause();
       } else {
-        widget.controller.play();
+        _controller.play();
       }
     });
   }
 
   void _toggleMute() {
     setState(() {
-      widget.controller.setVolume(widget.controller.value.volume == 0 ? 1 : 0);
+      _controller.setVolume(_controller.value.volume == 0 ? 1 : 0);
     });
   }
 
@@ -85,8 +113,50 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final duration = widget.controller.value.duration;
-    final position = widget.controller.value.position;
+    if (_hasError) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                color: AppPallete.error,
+                size: 48,
+              ),
+              SizedBox(height: AppSpacing.stackSm),
+              Text(
+                'No se pudo reproducir el video',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (!_isInitialized) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
+      );
+    }
+
+    final duration = _controller.value.duration;
+    final position = _controller.value.position;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -102,8 +172,8 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
             },
             child: Center(
               child: AspectRatio(
-                aspectRatio: widget.controller.value.aspectRatio,
-                child: VideoPlayer(widget.controller),
+                aspectRatio: _controller.value.aspectRatio,
+                child: VideoPlayer(_controller),
               ),
             ),
           ),
@@ -143,7 +213,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                   ),
                   padding: const EdgeInsets.all(16.0),
                   child: Icon(
-                    widget.controller.value.isPlaying
+                    _controller.value.isPlaying
                         ? Icons.pause
                         : Icons.play_arrow,
                     size: 56.0,
@@ -177,7 +247,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                     children: [
                       // Video Progress Slider
                       VideoProgressIndicator(
-                        widget.controller,
+                        _controller,
                         allowScrubbing: true,
                         colors: const VideoProgressColors(
                           playedColor: AppPallete.primaryContainer,
@@ -194,7 +264,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                               GestureDetector(
                                 onTap: _togglePlay,
                                 child: Icon(
-                                  widget.controller.value.isPlaying
+                                  _controller.value.isPlaying
                                       ? Icons.pause
                                       : Icons.play_arrow,
                                   color: Colors.white,
@@ -205,7 +275,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                               GestureDetector(
                                 onTap: _toggleMute,
                                 child: Icon(
-                                  widget.controller.value.volume == 0
+                                  _controller.value.volume == 0
                                       ? Icons.volume_off
                                       : Icons.volume_up,
                                   color: Colors.white,

@@ -55,10 +55,13 @@ class _ConfirmationVideoPreviewState extends State<ConfirmationVideoPreview> {
   void _openFullscreen() {
     if (_controller == null || !_isInitialized) return;
     
+    final currentPosition = _controller!.value.position;
+    
     Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
         builder: (context) => FullscreenVideoPlayer(
-          controller: _controller!,
+          videoUrl: widget.videoUrl,
+          initialPosition: currentPosition,
         ),
       ),
     ).then((_) {

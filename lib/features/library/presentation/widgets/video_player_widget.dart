@@ -82,6 +82,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   Future<void> _enterFullscreen() async {
     final bool wasPlaying = _controller.value.isPlaying;
+    final Duration currentPosition = _controller.value.position;
     if (wasPlaying) {
       _controller.pause();
     }
@@ -89,7 +90,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     await Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
         builder: (context) => FullscreenVideoPlayer(
-          controller: _controller,
+          videoUrl: widget.videoUrl,
+          initialPosition: currentPosition,
         ),
       ),
     );
