@@ -3,10 +3,12 @@ import 'package:velmar_ads/core/theme/app_pallete.dart';
 
 class BookingsHeader extends StatelessWidget {
   final VoidCallback? onFilterPressed;
+  final String activeFilter;
 
   const BookingsHeader({
     super.key,
     this.onFilterPressed,
+    this.activeFilter = 'todos',
   });
 
   @override
@@ -48,7 +50,9 @@ class BookingsHeader extends StatelessWidget {
                 color: AppPallete.onSurface,
               ),
               label: Text(
-                'Filtrar',
+                activeFilter == 'todos'
+                    ? 'Filtrar'
+                    : 'Filtro: ${activeFilter[0].toUpperCase()}${activeFilter.substring(1)}',
                 style: AppTypography.labelMd.copyWith(
                   color: AppPallete.onSurface,
                 ),
