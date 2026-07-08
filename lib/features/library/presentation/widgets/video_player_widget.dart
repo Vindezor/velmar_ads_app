@@ -18,7 +18,7 @@ class VideoPlayerWidget extends StatefulWidget {
 }
 
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
-  late VideoPlayerController _controller;
+  VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _hasError = false;
   bool _showControls = true;
@@ -31,16 +31,17 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   Future<void> _initializePlayer() async {
     try {
-      _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
-      await _controller.initialize();
+      final controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+      _controller = controller;
+      await controller.initialize();
       if (mounted) {
         setState(() {
           _isInitialized = true;
           if (widget.autoPlay) {
-            _controller.play();
+            controller.play();
           }
         });
-        _controller.addListener(_videoListener);
+        controller.addListener(_videoListener);
       }
     } catch (e) {
       if (mounted) {
@@ -59,32 +60,35 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   void dispose() {
-    _controller.removeListener(_videoListener);
-    _controller.dispose();
+    _controller?.removeListener(_videoListener);
+    _controller?.dispose();
     super.dispose();
   }
 
   void _togglePlay() {
+    if (_controller == null) return;
     setState(() {
-      if (_controller.value.isPlaying) {
-        _controller.pause();
+      if (_controller!.value.isPlaying) {
+        _controller!.pause();
       } else {
-        _controller.play();
+        _controller!.play();
       }
     });
   }
 
   void _toggleMute() {
+    if (_controller == null) return;
     setState(() {
-      _controller.setVolume(_controller.value.volume == 0 ? 1 : 0);
+      _controller!.setVolume(_controller!.value.volume == 0 ? 1 : 0);
     });
   }
 
   Future<void> _enterFullscreen() async {
-    final bool wasPlaying = _controller.value.isPlaying;
-    final Duration currentPosition = _controller.value.position;
+    if (_controller == null) return;
+    final bool wasPlaying = _controller!.value.isPlaying;
+    final Duration currentPosition = _controller!.value.position;
     if (wasPlaying) {
-      _controller.pause();
+      _controller!.pause();
     }
 
     await Navigator.of(context, rootNavigator: true).push(
@@ -99,7 +103,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     // After returning from fullscreen, resume playback state if it was playing
     if (mounted) {
       if (wasPlaying) {
-        _controller.play();
+        _controller!.play();
       }
       setState(() {});
     }
@@ -139,7 +143,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       );
     }
 
-    if (!_isInitialized) {
+    if (!_isInitialized || _controller == null) {
       return Container(
         height: 250,
         decoration: const BoxDecoration(
@@ -154,11 +158,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       );
     }
 
-    final duration = _controller.value.duration;
-    final position = _controller.value.position;
+    final duration = _controller!.value.duration;
+    final position = _controller!.value.position;
 
     return AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
+      aspectRatio: _controller!.value.aspectRatio,
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.black,
@@ -174,7 +178,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   _showControls = !_showControls;
                 });
               },
-              child: VideoPlayer(_controller),
+              child: VideoPlayer(_controller!),
             ),
             if (_showControls) ...[
               // Center Play/Pause button
@@ -188,7 +192,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                     ),
                     padding: const EdgeInsets.all(12.0),
                     child: Icon(
-                      _controller.value.isPlaying
+                      _controller!.value.isPlaying
                           ? Icons.pause
                           : Icons.play_arrow,
                       size: 48.0,
@@ -222,7 +226,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                     children: [
                       // Progress Bar
                       VideoProgressIndicator(
-                        _controller,
+                        _controller!,
                         allowScrubbing: true,
                         colors: const VideoProgressColors(
                           playedColor: AppPallete.primaryContainer,
@@ -240,7 +244,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                               GestureDetector(
                                 onTap: _togglePlay,
                                 child: Icon(
-                                  _controller.value.isPlaying
+                                  _controller!.value.isPlaying
                                       ? Icons.pause
                                       : Icons.play_arrow,
                                   color: Colors.white,
@@ -251,7 +255,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                               GestureDetector(
                                 onTap: _toggleMute,
                                 child: Icon(
-                                  _controller.value.volume == 0
+                                  _controller!.value.volume == 0
                                       ? Icons.volume_off
                                       : Icons.volume_up,
                                   color: Colors.white,

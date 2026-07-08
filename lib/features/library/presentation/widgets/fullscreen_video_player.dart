@@ -18,7 +18,7 @@ class FullscreenVideoPlayer extends StatefulWidget {
 }
 
 class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
-  late VideoPlayerController _controller;
+  VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _hasError = false;
   bool _showControls = true;
@@ -33,18 +33,19 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
 
   Future<void> _initializePlayer() async {
     try {
-      _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
-      await _controller.initialize();
+      final controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+      _controller = controller;
+      await controller.initialize();
       if (mounted) {
         setState(() {
           _isInitialized = true;
         });
-        await _controller.seekTo(widget.initialPosition);
-        _controller.play();
-        _controller.addListener(_videoListener);
+        await controller.seekTo(widget.initialPosition);
+        controller.play();
+        controller.addListener(_videoListener);
         
         // Auto-rotate screen based on video aspect ratio
-        final double aspect = _controller.value.aspectRatio;
+        final double aspect = controller.value.aspectRatio;
         if (aspect > 1.0) {
           SystemChrome.setPreferredOrientations([
             DeviceOrientation.landscapeLeft,
@@ -74,10 +75,8 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
 
   @override
   void dispose() {
-    if (_isInitialized) {
-      _controller.removeListener(_videoListener);
-      _controller.dispose();
-    }
+    _controller?.removeListener(_videoListener);
+    _controller?.dispose();
     
     // Restore system UI overlays and lock orientation to portrait only
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -89,18 +88,20 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
   }
 
   void _togglePlay() {
+    if (_controller == null) return;
     setState(() {
-      if (_controller.value.isPlaying) {
-        _controller.pause();
+      if (_controller!.value.isPlaying) {
+        _controller!.pause();
       } else {
-        _controller.play();
+        _controller!.play();
       }
     });
   }
 
   void _toggleMute() {
+    if (_controller == null) return;
     setState(() {
-      _controller.setVolume(_controller.value.volume == 0 ? 1 : 0);
+      _controller!.setVolume(_controller!.value.volume == 0 ? 1 : 0);
     });
   }
 
@@ -144,7 +145,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
       );
     }
 
-    if (!_isInitialized) {
+    if (!_isInitialized || _controller == null) {
       return const Scaffold(
         backgroundColor: Colors.black,
         body: Center(
@@ -155,8 +156,8 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
       );
     }
 
-    final duration = _controller.value.duration;
-    final position = _controller.value.position;
+    final duration = _controller!.value.duration;
+    final position = _controller!.value.position;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -172,8 +173,8 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
             },
             child: Center(
               child: AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
+                aspectRatio: _controller!.value.aspectRatio,
+                child: VideoPlayer(_controller!),
               ),
             ),
           ),
@@ -213,7 +214,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                   ),
                   padding: const EdgeInsets.all(16.0),
                   child: Icon(
-                    _controller.value.isPlaying
+                    _controller!.value.isPlaying
                         ? Icons.pause
                         : Icons.play_arrow,
                     size: 56.0,
@@ -247,7 +248,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                     children: [
                       // Video Progress Slider
                       VideoProgressIndicator(
-                        _controller,
+                        _controller!,
                         allowScrubbing: true,
                         colors: const VideoProgressColors(
                           playedColor: AppPallete.primaryContainer,
@@ -264,7 +265,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                               GestureDetector(
                                 onTap: _togglePlay,
                                 child: Icon(
-                                  _controller.value.isPlaying
+                                  _controller!.value.isPlaying
                                       ? Icons.pause
                                       : Icons.play_arrow,
                                   color: Colors.white,
@@ -275,7 +276,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
                               GestureDetector(
                                 onTap: _toggleMute,
                                 child: Icon(
-                                  _controller.value.volume == 0
+                                  _controller!.value.volume == 0
                                       ? Icons.volume_off
                                       : Icons.volume_up,
                                   color: Colors.white,
